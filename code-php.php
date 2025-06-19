@@ -39,9 +39,7 @@ function recup_id($nom,$prenom){
 
         if($result){
             $row = $result->fetch_assoc();
-	        echo(json_encode(array('id' => $row['id'], 'id_groupe' => $row['id_groupe'])));
-
-            $stmt->close();
+	        echo(json_encode(['id' => $row['id'], 'id_groupe' => $row['id_groupe']]));
         }
 
         else{
