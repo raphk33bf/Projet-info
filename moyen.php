@@ -1,38 +1,41 @@
 <?php
 
 ///FONCTIONS
+//on souhaite connaitre notre localisation a un timestamp donné qui n'exista pas forcément dans la base de donnees
+
+//recuperation du timestamp existant juste avant le timestamp donne
 function maxi_timestamp($n,$groupe,$connexion){
 	$req = "select timestamp from data_gps where id_phone= ".$groupe." and timestamp<=".$n." order by timestamp desc"  ;
 	$result = mysqli_query($connexion, $req);
 	if($result){
  
-        printf("<br> result est non vide <br>") ;
+       
         $row = $result->fetch_array(MYSQLI_ASSOC);
         return $row["timestamp"] ;
     }
     else{printf("<br> result est vide <br>") ;
 	}
 }
-//
+//recuperation du timestamp existant juste apres le timestamp donne
 function mini_timestamp($n,$groupe,$connexion){
 	$req = "select timestamp from data_gps where id_phone= ".$groupe." and timestamp>=".$n." order by timestamp asc"  ;
 	$result = mysqli_query($connexion, $req);
 	if($result){
  
-        printf("<br> result est non vide <br>") ;
+      
         $row = $result->fetch_array(MYSQLI_ASSOC);
         return $row["timestamp"] ;
     }
     else{printf("<br> result est vide <br>") ;
 	}
 }
-//ditance entre les duex points
+//renvoie notre localisation a un timestamp qui existe dans la base de donnees
 function localisation($n,$groupe,$connexion){
 	$req="select longitude,latitude from data_gps where id_phone= ".$groupe." and timestamp= ".$n;
 	$result = mysqli_query($connexion, $req);
 	if($result){
  
-        printf("<br> result est non vide <br>") ;
+       
         $row = $result->fetch_array(MYSQLI_ASSOC);
         return [$row["longitude"], $row["latitude"]];
        	 	
@@ -40,7 +43,7 @@ function localisation($n,$groupe,$connexion){
     else{printf("<br> result est vide <br>") ;
 	}
 }
-
+//renvoie la distance entre deux points donnes à partir de leurs coordonnées
 function distance($lat1, $lng1, $lat2, $lng2, $unit = 'k') {
         $earth_radius = 6378137;   // Terre = sphère de 6378km de rayon
         $rla1 = deg2rad($lat1);
@@ -56,9 +59,9 @@ function distance($lat1, $lng1, $lat2, $lng2, $unit = 'k') {
         if ($unit == 'k') {
             return $meter / 1000;
         }
-        return $meter;
+        return $meter; // ditance en km
     }
-
+//renvoie les cordonnees associées au timestamp (pas forcément existant) donné
 function position_x($n, $groupe,$connexion){
 	$maxt=maxi_timestamp($n,$groupe,$connexion);
 	$mint=mini_timestamp($n,$groupe,$connexion);
@@ -67,7 +70,8 @@ function position_x($n, $groupe,$connexion){
 	$distance= distance($loc_maxt[1], $loc_maxt[0], $loc_mint[1], $loc_mint[0], $unit = 'k');
 	$duree=$maxt-$mint;
 	if ($duree == 0 || $distance == 0) {
-		echo "Position fixe (aucun mouvement ou même timestamp).<br>";
+		$localisation=localisation($n,$groupe,$connexion);
+		print($localisation);
 		return;
 	}
 	$duree_x=$n-$maxt;
@@ -78,72 +82,70 @@ function position_x($n, $groupe,$connexion){
 	return [$n,$longitude_x,$latitude_x];
 	
 }
+/// calcule la vitesse en km/h entre un timestamp et 10sec plus tard
 
 function vitesse($n,$groupe,$connexion){
 	$mint=mini_timestamp($n,$groupe,$connexion);
-	$mint10=mini_timestamp($n+10,$group,$connexion);
+	$mint10=mini_timestamp($n+10,$groupe,$connexion);
 	$loc_mint= localisation($mint,$groupe,$connexion);
-	$loc_mint10= localisation($n+10,$groupe,$connexion);
+	$loc_mint10= localisation($mint10,$groupe,$connexion);
 	$distance= distance($loc_mint10[1], $loc_mint10[0], $loc_mint[1], $loc_mint[0], $unit = 'k');
 	$duree=$mint10-$mint;
 	if ($duree == 0 || $distance == 0) {
 		echo "Position fixe (aucun mouvement ou même timestamp).<br>";
 		return;
 	}
-	$vitesse=$distance/$duree;
-	print($vitesse); // vitesse en m/s
+	$vitesse=$distance/$duree*3600;
+	print($vitesse.'<br>'); // vitesse en km/h
 	return $vitesse;
 }
 
 
-
+/// renvoie un tableau associatif avec comme clé le timestamp du début et comme valeur le moyen de transport utilisé pour un intervalle de 10sec suivant le timestamp
 function deter_moyen($n1,$n2,$groupe,$connexion){
 	$n=$n1;
-	
 	$moyen= array();
 	while ($n<=$n2) {
-		$v=(vitesse($n,$groupe,$connexion)/1000)*3600;  // vitesse en km/h
+		$v=vitesse($n,$groupe,$connexion);  // vitesse en km/h
 		if ($v<=1){
-			$moyen['arret']=$n;
+			$moyen[$n]='arret';
 		}
 		elseif ($v<=6){
-			$moyen['marche']=$n;
+			$moyen[$n]='marche';
 		}
 		elseif ($v<=15){
-			$moyen['course']=$n;
+			$moyen[$n]='course';
 		}
 		elseif ($v<=25){
-			$moyen['vélo']=$n;
+			$moyen[$n]='velo';
 		}
-		else{
-			$moyen['bus']=$n;
+		elseif($v>25){
+			$moyen[$n]='bus';
 		}
 		$n+=10;
 	}
-	print($moyen);
-	intervalle_transport($n,$moyen,$connexion);
+	print_r($moyen);
+	print('<br>') ; 
+	$m=$n1;
+	intervalle_transport($m,$moyen,$connexion);
 }
-		
+/// Renvoie un tableau avec le timestamps de début d'utilisation d'un moyen de transport, puis quand ca change de moyen : nouvelle clé qui correspond au timestamp de changement de moyen associé au nouveau moyen comme valeur
 function intervalle_transport($n,$tab,$connexion){
-	$moyen0=array_search($n, $tab);
+	$moyen0=$tab[$n];
 	$tab_change=array();
-	$tab_change[$moyen0]=$n;
+	$tab_change[$n]=$moyen0;
 	foreach($tab AS $cle => $valeur) {
-		if ($cle!=$moyen0){
+		if ($valeur!=$moyen0){
 			$tab_change[$cle]=$valeur;
-			$moyen0=$cle;
+			$moyen0=$valeur;
 		}
 	}
-    print($tab_change);	
+    print_r($tab_change);	
 		
 }		
 		
 		
 		
-	
-	
-	
-	
 	
 
 ///PROGRAMME PRINCIPAL
