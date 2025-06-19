@@ -116,11 +116,14 @@ class MyApp(App):
         self.bouton_fin = Button(text="Fin")
         
         #Ajouter les rôles des boutons début et fin
-        
+        self.bouton_debut.bind(on_press = self.debut_gps)
+        self.bouton_fin.bind(on_press = self.fin_gps)
         
         self.layout.add_widget(self.bouton_debut)
         self.layout.add_widget(self.bouton_fin)
-        
+
+        #Definitions de debut_gps et fin_gps
+
 if __name__ == '__main__':
     
     MyApp().run()
