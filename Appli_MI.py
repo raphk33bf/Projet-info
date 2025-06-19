@@ -106,6 +106,7 @@ class MyApp(App):
         self.demande_essence_arbre = TextInput()
         self.layout.add_widget(self.demande_essence_arbre)
         timestamp_arbre = time()
+        #Manque l'envoie à la BD
         
         
     def ajout_trajet(self, instance):
@@ -125,13 +126,21 @@ class MyApp(App):
        
     def debut_gps(self, instance):
         """Fonction permettant le début d'un enregistrement gps sans limite de temps fixe"""
-        #A construire
-        pass
+        self.layout.clear_widgets()
+        self.attente_gps = Label(text = "En attente des positions GPS")
+        self.layout.add_widget(self.attente_gps)
+        gps.configure(on_location=self.on_location)
+        gps.start()
+     #Manque la connexion à la BD
+
+         
+    def recup_donnees_gps(self, **kwargs):
+        self.attente_gps.text = '\n'.join(['{}={}'.format(k, v) for k, v in kwargs.items()])
     
     def fin_gps(self, instance):
         """Fonction permettant la fin d'un enregistrement gps sans limite de temps fixe"""
-        #A construire
-        pass
+        #A construire/ Doit permettre d'afficher les sous-transports et de comparer avec ceux rentrer par l'utilisateur
+        gps.stop()
 if __name__ == '__main__':
     
     MyApp().run()
