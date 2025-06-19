@@ -141,6 +141,13 @@ class MyApp(App):
         """Fonction permettant la fin d'un enregistrement gps sans limite de temps fixe"""
         #A construire/ Doit permettre d'afficher les sous-transports et de comparer avec ceux rentrer par l'utilisateur
         gps.stop()
+
+    def lieux_interet (self, **kwargs) : 
+        """Fonction permettant d'enregistrer les points d'intérêts traverser sur un trajet donné"""
+        #récupérer les données GPS des lieux d'intérêt avec leur nom de la BD 
+        #Comparer la dernière valeur de donnée avec chacune des données des points d'intérêts
+        #Si on est à moins de 100m du point d'intéret l'enregistrer dans une liste
+        #afficher la liste des lieux à proximité de notre trajet
 if __name__ == '__main__':
     
     MyApp().run()
