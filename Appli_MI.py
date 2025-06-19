@@ -122,8 +122,16 @@ class MyApp(App):
         self.layout.add_widget(self.bouton_debut)
         self.layout.add_widget(self.bouton_fin)
 
-        #Definitions de debut_gps et fin_gps
-
+       
+    def debut_gps(self, instance):
+        """Fonction permettant le début d'un enregistrement gps sans limite de temps fixe"""
+        #A construire
+        pass
+    
+    def fin_gps(self, instance):
+        """Fonction permettant la fin d'un enregistrement gps sans limite de temps fixe"""
+        #A construire
+        pass
 if __name__ == '__main__':
     
     MyApp().run()
