@@ -54,5 +54,6 @@ function recup_id($nom,$prenom){
 
 }
 
+recup_id($nom,$prenom);
 
 ?>
