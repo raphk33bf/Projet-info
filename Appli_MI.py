@@ -158,7 +158,7 @@ class MyApp(App):
         UrlRequest(url='http://irioso.free.fr/Ambrasobin/recup_donnees.php', req_body=json.dumps(data),  req_headers=headers, on_success=self.on_success)
         
     def on_success(self, request, result):
-        self.label = Label(text=result)
+        #self.label = Label(text=result)
         
     
     def fin_gps(self, instance):
