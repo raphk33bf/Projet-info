@@ -56,18 +56,21 @@ class MyApp(App):
         """Envoie des données d'identification à la base de données"""
         nom = self.nom_input.text.upper()
         prenom = self.prenom_input.text.lower()
+        print(nom, prenom)
         
         #encodage des informations à transmettre
         req_body = json.dumps({'nom':nom, 'prenom':prenom})
         req_method = 'POST'
         
-        UrlRequest('http://localhost:8888/src/index.php', req_body = req_body,method=req_method,  on_success = self.page_principale)
+        UrlRequest('http://irioso.free.fr/Ambrasobin/code-php.php', req_body = req_body,method=req_method,  on_success = self.page_principale)
         
-        #récupération de l'id_élève, de l'id_groupe
+        #récupération de l'id_élève, de l'id_groupe -> Raphaël
         
         
     def page_principale(self,request, result): 
         """Page de choix de l'action : enregistrement d'un arbre ou d'un trajet"""
+        print(result)
+        print("Bonjour")
         self.layout.clear_widgets()
         self.title = "Ambrasobin - Page principale"
         self.titre_page_principale = Label(text= "Bienvenue sur la page principale !",underline = True, font_size='50sp', markup=True, color=[0.16,0.42,0.17,1])
@@ -105,9 +108,8 @@ class MyApp(App):
         self.layout.add_widget(self.essence_arbre)
         self.demande_essence_arbre = TextInput()
         self.layout.add_widget(self.demande_essence_arbre)
-        timestamp_arbre = time()
+        self.timestamp_arbre = time() 
         #Manque l'envoie à la BD
-        
         
     def ajout_trajet(self, instance):
         """"Construction de la page pour ajouter un trajet"""
@@ -122,32 +124,34 @@ class MyApp(App):
         
         self.layout.add_widget(self.bouton_debut)
         self.layout.add_widget(self.bouton_fin)
-
-       
+        
     def debut_gps(self, instance):
         """Fonction permettant le début d'un enregistrement gps sans limite de temps fixe"""
         self.layout.clear_widgets()
         self.attente_gps = Label(text = "En attente des positions GPS")
         self.layout.add_widget(self.attente_gps)
-        gps.configure(on_location=self.on_location)
+        gps.configure(on_location=self.recup_donnees_gps)
         gps.start()
-     #Manque la connexion à la BD
-
-         
+        self.timestamp_arbre = time() 
+        
     def recup_donnees_gps(self, **kwargs):
         self.attente_gps.text = '\n'.join(['{}={}'.format(k, v) for k, v in kwargs.items()])
+        
     
     def fin_gps(self, instance):
         """Fonction permettant la fin d'un enregistrement gps sans limite de temps fixe"""
         #A construire/ Doit permettre d'afficher les sous-transports et de comparer avec ceux rentrer par l'utilisateur
         gps.stop()
-
+        
     def lieux_interet (self, **kwargs) : 
         """Fonction permettant d'enregistrer les points d'intérêts traverser sur un trajet donné"""
         #récupérer les données GPS des lieux d'intérêt avec leur nom de la BD 
         #Comparer la dernière valeur de donnée avec chacune des données des points d'intérêts
         #Si on est à moins de 100m du point d'intéret l'enregistrer dans une liste
         #afficher la liste des lieux à proximité de notre trajet
+        
+        
+    
 if __name__ == '__main__':
     
     MyApp().run()
