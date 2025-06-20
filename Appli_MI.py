@@ -135,7 +135,7 @@ class MyApp(App):
         
     def debut_gps(self, instance):
         """Fonction permettant le début d'un enregistrement gps sans limite de temps fixe"""
-        self.layout.clear_widgets()
+        
         self.attente_gps = Label(text = "En attente des positions GPS")
         self.layout.add_widget(self.attente_gps)
         gps.configure(on_location=self.recup_donnees_gps)
