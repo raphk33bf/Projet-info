@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Spyder Editor
+
+This is a temporary script file.
+"""
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -18,10 +25,11 @@ from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.textinput import TextInput
 from random import randint
+from kivy.clock import Clock
 from kivy.network.urlrequest import UrlRequest
-import json
 from time import time
 from plyer import gps
+import json
 
 
 
@@ -132,16 +140,47 @@ class MyApp(App):
         self.layout.add_widget(self.attente_gps)
         gps.configure(on_location=self.recup_donnees_gps)
         gps.start()
-        self.timestamp_arbre = time() 
+        self.event = Clock.schedule_interval(self.recup_donnes_gps, 0.5)
+        self.timestamp_debut = time() 
         
     def recup_donnees_gps(self, **kwargs):
         self.attente_gps.text = '\n'.join(['{}={}'.format(k, v) for k, v in kwargs.items()])
+        longitude=kwargs.get('longitude')
+        latitude=kwargs.get('latitude')
+        altitude=kwargs.get('altitude')
+        timestamp=time()
+        
+        data = {'longitude': longitude, 'latitude': latitude, 'altitude': altitude,'timestamp': timestamp}
+
+        headers = {'Content-Type': 'application/json'}
+
+      
+        UrlRequest(url='http://irioso.free.fr/Ambrasobin/recup_donnees.php', req_body=json.dumps(data),  req_headers=headers, on_success=self.on_success)
+        
+    def on_success(self, request, result):
+        self.label = Label(text=result)
         
     
     def fin_gps(self, instance):
         """Fonction permettant la fin d'un enregistrement gps sans limite de temps fixe"""
         #A construire/ Doit permettre d'afficher les sous-transports et de comparer avec ceux rentrer par l'utilisateur
         gps.stop()
+        self.layout.clear_widgets()
+        self.title = "Voila les moyens de transport que vous avez utilisé"
+        self.timestamp_fin=time()
+        
+        data = {'n1': self.timestamp_debut, 'n2': self.timestamp_fin}
+        
+        headers = {'Content-Type': 'application/json'}
+
+      
+        UrlRequest(url='http://irioso.free.fr/Ambrasobin/deter_moyen.php', req_body=json.dumps(data),  req_headers=headers, on_success=self.get_result)
+        
+    def get_result(self, requete, resultat):
+        for key, value in requete.resp_headers.items():
+            print('{}: {}'.format(key, value))
+         
+        
         
     def lieux_interet (self, **kwargs) : 
         """Fonction permettant d'enregistrer les points d'intérêts traverser sur un trajet donné"""
