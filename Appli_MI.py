@@ -140,7 +140,7 @@ class MyApp(App):
         self.layout.add_widget(self.attente_gps)
         gps.configure(on_location=self.recup_donnees_gps)
         gps.start()
-        self.event = Clock.schedule_interval(self.recup_donnes_gps, 1)
+        self.event = Clock.schedule_interval(self.recup_donnees_gps, 1)
         self.timestamp_debut = time() 
         
     def recup_donnees_gps(self, **kwargs):
@@ -169,7 +169,7 @@ class MyApp(App):
         self.title = "Voila les moyens de transport que vous avez utilisé"
         self.timestamp_fin=time()
         
-        data = {'n1': self.timestamp_debut, 'n2': self.timestamp_fin}
+        data = {'timestamp_debut': self.timestamp_debut, 'timestamp_fin': self.timestamp_fin}
         
         headers = {'Content-Type': 'application/json'}
 
