@@ -184,11 +184,24 @@ class MyApp(App):
         
     def lieux_interet (self, **kwargs) : 
         """Fonction permettant d'enregistrer les points d'intérêts traverser sur un trajet donné"""
+        liste_lieux_visités = []
         #récupérer les données GPS des lieux d'intérêt avec leur nom de la BD 
+        UrlRequest('http://localhost:8888/lieu_d_interet_local.php', on_success = self.recup_lieux)
         #Comparer la dernière valeur de donnée avec chacune des données des points d'intérêts
-        #Si on est à moins de 100m du point d'intéret l'enregistrer dans une liste
-        #afficher la liste des lieux à proximité de notre trajet
-        
+        #->Fonction distance entre deux points php et comparaison au rayon de chaque point
+        for i in range(0, len(self.tableau_lieux_interet)): 
+            #if distance(point_actuel, tableau_lieux_interet[i])< rayon : 
+                liste_lieux_visités.append(self.tableau_lieux_interet[i])
+        #Si on est dans le rayon d'un point d'intérêt 
+        print('Bonjour')
+    
+    def recup_lieux (self, request, result):
+        """Fonction de récupération des points d'intérêt, chaque données les concernant est stockées sous forme de tableaux"""
+        self.tableau_lieux_interet = json.loads(result)['noms_lieux']
+        self.tableau_id_lieux = json.loads(result)['id_lieux']
+        self.tableau_latitudes = json.loads(result)['latitudes']
+        self.tableau_longitudes= json.loads(result)['longitudes']
+        print(self.tableau_lieux_interet)
         
     
 if __name__ == '__main__':
