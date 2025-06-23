@@ -208,8 +208,22 @@ class MyApp(App):
         self.tableau_id_lieux = json.loads(result)['id_lieux']
         self.tableau_latitudes = json.loads(result)['latitudes']
         self.tableau_longitudes= json.loads(result)['longitudes']
-        print(self.tableau_lieux_interet)
+        self.label_lieux_interet= Label(text= self.tableau_lieux_interet)
         
+        self.layout.add_widget(self.label_lieux_interet)
+        latitude1 = 18
+        longitude1 = 21
+        latitude2 = 32
+        longitude2 = 44
+        #encodage des informations à transmettre
+        req_body = json.dumps({'lat1':latitude1, 'long1':longitude1, 'lat2': latitude2, 'long2': longitude2})
+        req_method = 'POST'
+        
+        UrlRequest(url='http://localhost:8888/distance.php',req_body = req_body,method=req_method, on_success = self.distance_interet)
+        
+    def distance_interet(self, request, result):
+        self.label_distance = Label(text= result)
+        self.layout.add_widget(self.label_distance)
     
 if __name__ == '__main__':
     
