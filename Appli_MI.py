@@ -145,20 +145,25 @@ class MyApp(App):
         
     def recup_donnees_gps(self, **kwargs):
         self.attente_gps.text = '\n'.join(['{}={}'.format(k, v) for k, v in kwargs.items()])
-        longitude=kwargs.get('longitude')
-        latitude=kwargs.get('latitude')
+        longitude=kwargs.get('lon')
+        latitude=kwargs.get('lat')
         altitude=kwargs.get('altitude')
+        speed=kwargs.get('speed')
+        accuracy=kwargs.get('accuracy')
+        bearing=kwargs.get('bearing')
         timestamp=time()
         
-        data = {'longitude': longitude, 'latitude': latitude, 'altitude': altitude,'timestamp': timestamp}
+        data = {'longitude': longitude, 'latitude': latitude, 'altitude': altitude,'timestamp': timestamp, 'speed': speed, 'bearing': bearing, 'accuracy' : accuracy}
 
         headers = {'Content-Type': 'application/json'}
 
       
-        UrlRequest(url='http://irioso.free.fr/Groupe_1/recup_donnees.php', req_body=json.dumps(data),  req_headers=headers, on_success=self.on_success)
+        UrlRequest(url='http://irioso.free.fr/Ambrasobin/recup_donnees.php', req_body=json.dumps(data),  req_headers=headers, on_success=self.on_success)
         
     def on_success(self, request, result):
         #self.label = Label(text=result)
+        pass
+        
         
     
     def fin_gps(self, instance):
@@ -174,11 +179,13 @@ class MyApp(App):
         headers = {'Content-Type': 'application/json'}
 
       
-        UrlRequest(url='http://irioso.free.fr/Groupe_1/deter_moyen.php', req_body=json.dumps(data),  req_headers=headers, on_success=self.get_result)
+        UrlRequest(url='http://irioso.free.fr/Ambrasobin/deter_moyen.php', req_body=json.dumps(data),  req_headers=headers, on_success=self.get_result)
         
     def get_result(self, requete, resultat):
-        for key, value in requete.resp_headers.items():
-            print('{}: {}'.format(key, value))
+        # for key, value in requete.resp_headers.items():
+        #     return('{}: {}'.format(key, value))
+         self.label = Label(text=resultat)
+         self.layout.add_widget(self.label)
          
         
         
