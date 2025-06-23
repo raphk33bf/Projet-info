@@ -148,10 +148,13 @@ class MyApp(App):
         self.attente_gps.text = '\n'.join(['{}={}'.format(k, v) for k, v in kwargs.items()])
         longitude=kwargs.get('lon')
         latitude=kwargs.get('lat')
-        altitude=kwargs.get('alt')
+        altitude=kwargs.get('altitude')
+        speed=kwargs.get('speed')
+        accuracy=kwargs.get('accuracy')
+        bearing=kwargs.get('bearing')
         timestamp=time()
         
-        data = {'longitude': longitude, 'latitude': latitude, 'altitude': altitude,'timestamp': timestamp}
+        data = {'longitude': longitude, 'latitude': latitude, 'altitude': altitude,'timestamp': timestamp, 'speed': speed, 'bearing': bearing, 'accuracy' : accuracy}
 
         headers = {'Content-Type': 'application/json'}
 
