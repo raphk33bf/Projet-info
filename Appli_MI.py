@@ -77,8 +77,6 @@ class MyApp(App):
         
     def page_principale(self,request, result): 
         """Page de choix de l'action : enregistrement d'un arbre ou d'un trajet"""
-        print(result)
-        print("Bonjour")
         self.layout.clear_widgets()
         self.title = "Ambrasobin - Page principale"
         self.titre_page_principale = Label(text= "Bienvenue sur la page principale !",underline = True, font_size='50sp', markup=True, color=[0.16,0.42,0.17,1])
