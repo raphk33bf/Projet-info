@@ -70,7 +70,7 @@ class MyApp(App):
         req_body = json.dumps({'nom':nom, 'prenom':prenom})
         req_method = 'POST'
         
-        UrlRequest('http://irioso.free.fr/Ambrasobin/code-php.php', req_body = req_body,method=req_method,  on_success = self.page_principale)
+        UrlRequest('http://irioso.free.fr/Groupe_1/code-php.php', req_body = req_body,method=req_method,  on_success = self.page_principale)
         
         #récupération de l'id_élève, de l'id_groupe -> Raphaël
         
@@ -155,7 +155,7 @@ class MyApp(App):
         headers = {'Content-Type': 'application/json'}
 
       
-        UrlRequest(url='http://irioso.free.fr/Ambrasobin/recup_donnees.php', req_body=json.dumps(data),  req_headers=headers, on_success=self.on_success)
+        UrlRequest(url='http://irioso.free.fr/Groupe_1/recup_donnees.php', req_body=json.dumps(data),  req_headers=headers, on_success=self.on_success)
         
     def on_success(self, request, result):
         #self.label = Label(text=result)
@@ -174,7 +174,7 @@ class MyApp(App):
         headers = {'Content-Type': 'application/json'}
 
       
-        UrlRequest(url='http://irioso.free.fr/Ambrasobin/deter_moyen.php', req_body=json.dumps(data),  req_headers=headers, on_success=self.get_result)
+        UrlRequest(url='http://irioso.free.fr/Groupe_1/deter_moyen.php', req_body=json.dumps(data),  req_headers=headers, on_success=self.get_result)
         
     def get_result(self, requete, resultat):
         for key, value in requete.resp_headers.items():
@@ -186,7 +186,7 @@ class MyApp(App):
         """Fonction permettant d'enregistrer les points d'intérêts traverser sur un trajet donné"""
         liste_lieux_visités = []
         #récupérer les données GPS des lieux d'intérêt avec leur nom de la BD 
-        UrlRequest('http://localhost:8888/lieu_d_interet_local.php', on_success = self.recup_lieux)
+        UrlRequest('http://irioso.free.fr/Groupe_1/lieu_d_interet_local.php', on_success = self.recup_lieux)
         #Comparer la dernière valeur de donnée avec chacune des données des points d'intérêts
         #->Fonction distance entre deux points php et comparaison au rayon de chaque point
         for i in range(0, len(self.tableau_lieux_interet)): 
