@@ -64,58 +64,119 @@ class MyApp(App):
         """Envoie des données d'identification à la base de données"""
         nom = self.nom_input.text.upper()
         prenom = self.prenom_input.text.lower()
-        print(nom, prenom)
         
         #encodage des informations à transmettre
         req_body = json.dumps({'nom':nom, 'prenom':prenom})
         req_method = 'POST'
         
-        UrlRequest('http://irioso.free.fr/Groupe_1/code-php.php', req_body = req_body,method=req_method,  on_success = self.page_principale)
-        
-        #récupération de l'id_élève, de l'id_groupe -> Raphaël
+        UrlRequest('http://irioso.free.fr/Groupe_1/recup_id.php', req_body = req_body,method=req_method,  on_success = self.page_principale)
         
         
+           
     def page_principale(self,request, result): 
+
         """Page de choix de l'action : enregistrement d'un arbre ou d'un trajet"""
+
+        self.id=json.loads(result)['id']
+        self.id_grp=json.loads(result)['id_groupe']
+
         self.layout.clear_widgets()
         self.title = "Ambrasobin - Page principale"
         self.titre_page_principale = Label(text= "Bienvenue sur la page principale !",underline = True, font_size='50sp', markup=True, color=[0.16,0.42,0.17,1])
         self.layout.add_widget(self.titre_page_principale)
         self.choix_donnees = Label(text="Veux-tu ajouter un arbre ou un trajet ?")
         self.arbre = Button(text="Ajouter un arbre", color=[1,1,1,1], background_normal = "", background_color = [0.16,0.42,0.17,1])
-        self.arbre.bind(on_press=self.ajout_arbre)
+        self.arbre.bind(on_press=self.arbre)
         self.trajet = Button(text="Ajouter un trajet", color=[1,1,1,1], background_normal = "", background_color = [0.16,0.42,0.17,1])
         self.trajet.bind(on_press=self.ajout_trajet)
         self.layout.add_widget(self.choix_donnees)       
         self.layout.add_widget(self.arbre)
         self.layout.add_widget(self.trajet)
         
-    def ajout_arbre(self, instance):
+    def arbre(self, instance, kwargs):
         """Construction de la page pour ajouter un arbre"""
         self.layout.clear_widgets()
         self.title = "Ambrasobin - Page Arbre"
         
-        self.debut_gps_arbre = Button(text="Prise de position")
-        self.debut_gps_arbre.bind(on_press=self.enregistrement_arbre)
-        self.layout.add_widget(self.debut_gps_arbre)
-    
-    def enregistrement_arbre(self, instance):
-        """Récupération  de la position GPS de l'arbre"""
         #récupération de la position GPS
+        gps.start()
+        self.lat = kwargs['lat']
+        self.long = kwargs['lon']
+        gps.stop()
+
         
-        #parcour de la base de données pour savoir s'il existe 
+        self.debut_gps_arbre = Button(text="Prise de position")
+        self.debut_gps_arbre.bind(on_press=self.lancer_verification_arbre)
+        self.layout.add_widget(self.debut_gps_arbre)
+
+    def lancer_verification_arbre(self, instance):
         
-        #s'il existe afficher les données dessus et ajouter une observation de l'arbre dans la BD
+        req_body = json.dumps({'long': self.long, 'lat': self.lat})
+        req_method = 'POST'
+        UrlRequest('http://irioso.free.fr/Groupe_1/distance_arbre.php', req_body=req_body, method=req_method, on_success=self.verification_arbre)
         
-        #s'il n'existe pas permettre d'en ajouter un 
+    
+    def verification_arbre(self, request, result):
+        booleen = json.loads(result)['booleen']
+        if boolenn==True:
+
+            id_arbre = json.loads(result)['id']
+
+            req_body = json.dumps({'long':long, 'lat':lat, 'id':id_arbre})
+            req_method = 'POST'
+            UrlRequest('http://irioso.free.fr/Groupe_1/MAJ_arbre.php', req_body = json.dumps({'id':id_arbre}), method='POST', on_success=self.message_arbre)
+        else :
+            #pas d'arbre, on peut en ajouter un
+            
+            self.enregistrement_arbre(None)
+
+    def message_arbre(self):
+        """Affichage d'un message pour dire que l'arbre a été ajouté"""
+        self.layout.clear_widgets()
+        self.title = "Ambrasobin - Arbre ajouté"
+        self.message = Label(text="L'arbre a bien été ajouté !")
+        self.layout.add_widget(self.message)
+        
+        #retour à la page principale
+        self.bouton_retour = Button(text="Retour à la page principale")
+        self.bouton_retour.bind(on_press=self.page_principale)
+        self.layout.add_widget(self.bouton_retour)
+
+    def enregistrement_nv_arbre(self, instance):
+       
+        
         self.layout.clear_widgets()
         self.title = "Ambrosin - Enregistrement d'un nouvel arbre"
         self.essence_arbre = Label(text="Quel est l'essence de l'arbre ?")
         self.layout.add_widget(self.essence_arbre)
         self.demande_essence_arbre = TextInput()
         self.layout.add_widget(self.demande_essence_arbre)
-        self.timestamp_arbre = time() 
-        #Manque l'envoie à la BD
+        essence_arbre = self.demande_essence_arbre.text
+
+
+        self.circonference_arbre = Label(text="Quel est la circonference de l'arbre ?")
+        self.layout.add_widget(self.circonference_arbre)
+        self.demande_circonference_arbre = TextInput()
+        self.layout.add_widget(self.demande_circonference_arbre)
+        circonference_arbre = self.demande_circonference_arbre.text
+
+        self.mort_arbre = Label(text="Quel est l'état de l'arbre (0 mort, 1 vivant) ?")
+        self.layout.add_widget(self.mort_arbre)
+        self.demande_mort_arbre = TextInput()
+        self.layout.add_widget(self.demande_mort_arbre)
+        mort_arbre = self.demande_mort_arbre.text
+
+        self.nom_img = Label(text="nom de l'image ?")
+        self.layout.add_widget(self.nom_img)
+        self.demande_nom_img=TextInput()
+        self.layout.add_widget(self.demande_nom_img)
+        nom_img=self.demande_nom_img.text
+       
+        timestamp_arbre = time()
+        
+        req_body = json.dumps({'essence':essence_arbre, 'circonference':circonference_arbre, 'mort':mort_arbre, 'id_groupe':self.id_grp, 'lat':lat, 'long':long, 'timestamp':timestamp_arbre, 'nom_img': nom_img})
+        req_method = 'POST'
+        UrlRequest('http://irioso.free.fr/Groupe_1/ajout_arbre.php', req_body = req_body, method=req_method, on_success=self.message_arbre)
         
     def ajout_trajet(self, instance):
         """"Construction de la page pour ajouter un trajet"""
