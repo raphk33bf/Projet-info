@@ -188,7 +188,7 @@ class MyApp(App):
         self.label=Label(text=self.nom_dec.text)
         self.layout.add_widget(self.label)  
         
-        data = {'timestamp_debut': self.timestamp_debut, 'timestamp_fin': self.timestamp_fin, 'nom_est': self.nom_est,'nom_dec': self.nom_dec}
+        data = {'timestamp_debut': self.timestamp_debut, 'timestamp_fin': self.timestamp_fin, 'nom_est': self.nom_est,'nom_dec': self.nom_dec.text}
 
         headers = {'Content-Type': 'application/json'}
 
