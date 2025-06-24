@@ -1,0 +1,479 @@
+j'ai envie de faire une fonction qui demande a l'utilisateur de rentrer les moyens de transport qu'il a utilisé à l'issue d'un trajet et qui renvoie la comparaison entre les moyens estimés par le programme et ceux donnés. peux tu faire une fonction facile qui s'insere bien dans notre programme ? Le voici (python) : 
+# -*- coding: utf-8 -*-
+"""
+Spyder Editor
+
+This is a temporary script file.
+"""
+
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Jun 18 11:55:40 2025
+
+@author: gabinalvarezsilva
+
+Partie permettant l'affichage de l'application du module intégratif. Permet de rentrer son identifiant, d'ajouter un arbre et d'ajouter un trajet
+
+"""
+"""Importation des bibliothèques"""
+from kivy.app import App
+from kivy.core.window import Window
+from kivy.uix.widget import Widget
+from kivy.network.urlrequest import UrlRequest
+from kivy.uix.label import Label
+from kivy.uix.button import Button
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.textinput import TextInput
+from random import randint
+from kivy.clock import Clock
+from kivy.network.urlrequest import UrlRequest
+from time import time
+from plyer import gps
+import json
+
+
+
+"""Création de l'application"""
+class MyApp(App):
+ 
+    def build(self):
+        """Création de la page générale"""
+        self.title = 'Ambrasobin - Page de connexion'
+        self.layout = BoxLayout(orientation='vertical')
+        self.fen()
+        
+        return self.layout
+    
+    def fen(self): 
+        """Création de la page permettant la connexion"""
+        self.layout.clear_widgets()  
+        self.nom_texte = Label(text="Quel est ton nom ?")
+        self.layout.add_widget(self.nom_texte)
+        self.nom_input = TextInput(text="NOM")
+        self.layout.add_widget(self.nom_input)
+        self.prenom_texte = Label(text="Quel est ton prénom ?")
+        self.layout.add_widget(self.prenom_texte)
+        self.prenom_input = TextInput(text="Prénom")
+
+        self.layout.add_widget(self.prenom_input)
+        self.bouton_valid = Button(text="S'identifier")
+        self.bouton_valid.bind(on_press=self.identification)
+        self.layout.add_widget(self.bouton_valid)
+        
+    def identification(self, instance): 
+        """Envoie des données d'identification à la base de données"""
+        nom = self.nom_input.text.upper()
+        prenom = self.prenom_input.text.lower()
+        
+        #encodage des informations à transmettre
+        req_body = json.dumps({'nom':nom, 'prenom':prenom})
+        req_method = 'POST'
+        
+        UrlRequest('http://irioso.free.fr/Groupe_1/recup_id.php', req_body = req_body,method=req_method,  on_success = self.page_principale)
+        
+        
+           
+    def page_principale(self,request, result): 
+
+        """Page de choix de l'action : enregistrement d'un arbre ou d'un trajet"""
+
+        self.id=json.loads(result)['id']
+        self.id_grp=json.loads(result)['id_groupe']
+
+        self.layout.clear_widgets()
+        self.title = "Ambrasobin - Page principale"
+        self.titre_page_principale = Label(text= "Bienvenue sur la page principale !",underline = True, font_size='50sp', markup=True, color=[0.16,0.42,0.17,1])
+        self.layout.add_widget(self.titre_page_principale)
+        self.choix_donnees = Label(text="Veux-tu ajouter un arbre ou un trajet ?")
+        self.arbre = Button(text="Ajouter un arbre", color=[1,1,1,1], background_normal = "", background_color = [0.16,0.42,0.17,1])
+        self.arbre.bind(on_press=self.arbre)
+        self.trajet = Button(text="Ajouter un trajet", color=[1,1,1,1], background_normal = "", background_color = [0.16,0.42,0.17,1])
+        self.trajet.bind(on_press=self.ajout_trajet)
+        self.layout.add_widget(self.choix_donnees)       
+        self.layout.add_widget(self.arbre)
+        self.layout.add_widget(self.trajet)
+        
+    def arbre(self, instance, kwargs):
+        """Construction de la page pour ajouter un arbre"""
+        self.layout.clear_widgets()
+        self.title = "Ambrasobin - Page Arbre"
+        
+        #récupération de la position GPS
+        gps.start()
+        self.lat = kwargs['lat']
+        self.long = kwargs['lon']
+        gps.stop()
+
+        
+        self.debut_gps_arbre = Button(text="Prise de position")
+        self.debut_gps_arbre.bind(on_press=self.lancer_verification_arbre)
+        self.layout.add_widget(self.debut_gps_arbre)
+
+    def lancer_verification_arbre(self, instance):
+        
+        req_body = json.dumps({'long': self.long, 'lat': self.lat})
+        req_method = 'POST'
+        UrlRequest('http://irioso.free.fr/Groupe_1/distance_arbre.php', req_body=req_body, method=req_method, on_success=self.verification_arbre)
+        
+    
+    def verification_arbre(self, request, result):
+        booleen = json.loads(result)['booleen']
+        if boolenn==True:
+
+            id_arbre = json.loads(result)['id']
+
+            req_body = json.dumps({'long':long, 'lat':lat, 'id':id_arbre})
+            req_method = 'POST'
+            UrlRequest('http://irioso.free.fr/Groupe_1/MAJ_arbre.php', req_body = json.dumps({'id':id_arbre}), method='POST', on_success=self.message_arbre)
+        else :
+            #pas d'arbre, on peut en ajouter un
+            
+            self.enregistrement_arbre(None)
+
+    def message_arbre(self):
+        """Affichage d'un message pour dire que l'arbre a été ajouté"""
+        self.layout.clear_widgets()
+        self.title = "Ambrasobin - Arbre ajouté"
+        self.message = Label(text="L'arbre a bien été ajouté !")
+        self.layout.add_widget(self.message)
+        
+        #retour à la page principale
+        self.bouton_retour = Button(text="Retour à la page principale")
+        self.bouton_retour.bind(on_press=self.page_principale)
+        self.layout.add_widget(self.bouton_retour)
+
+    def enregistrement_nv_arbre(self, instance):
+       
+        
+        self.layout.clear_widgets()
+        self.title = "Ambrosin - Enregistrement d'un nouvel arbre"
+        self.essence_arbre = Label(text="Quel est l'essence de l'arbre ?")
+        self.layout.add_widget(self.essence_arbre)
+        self.demande_essence_arbre = TextInput()
+        self.layout.add_widget(self.demande_essence_arbre)
+        essence_arbre = self.demande_essence_arbre.text
+
+
+        self.circonference_arbre = Label(text="Quel est la circonference de l'arbre ?")
+        self.layout.add_widget(self.circonference_arbre)
+        self.demande_circonference_arbre = TextInput()
+        self.layout.add_widget(self.demande_circonference_arbre)
+        circonference_arbre = self.demande_circonference_arbre.text
+
+        self.mort_arbre = Label(text="Quel est l'état de l'arbre (0 mort, 1 vivant) ?")
+        self.layout.add_widget(self.mort_arbre)
+        self.demande_mort_arbre = TextInput()
+        self.layout.add_widget(self.demande_mort_arbre)
+        mort_arbre = self.demande_mort_arbre.text
+
+        self.nom_img = Label(text="nom de l'image ?")
+        self.layout.add_widget(self.nom_img)
+        self.demande_nom_img=TextInput()
+        self.layout.add_widget(self.demande_nom_img)
+        nom_img=self.demande_nom_img.text
+       
+        timestamp_arbre = time()
+        
+        req_body = json.dumps({'essence':essence_arbre, 'circonference':circonference_arbre, 'mort':mort_arbre, 'id_groupe':self.id_grp, 'lat':lat, 'long':long, 'timestamp':timestamp_arbre, 'nom_img': nom_img})
+        req_method = 'POST'
+        UrlRequest('http://irioso.free.fr/Groupe_1/ajout_arbre.php', req_body = req_body, method=req_method, on_success=self.message_arbre)
+        
+    def ajout_trajet(self, instance):
+        """"Construction de la page pour ajouter un trajet"""
+        self.layout.clear_widgets()
+        self.title = "Ambrasobin - Page Trajet"
+        self.bouton_debut = Button(text="Début")
+        self.bouton_fin = Button(text="Fin")
+        
+        #Ajouter les rôles des boutons début et fin
+        self.bouton_debut.bind(on_press = self.debut_gps)
+        self.bouton_fin.bind(on_press = self.fin_gps)
+        
+        self.layout.add_widget(self.bouton_debut)
+        self.layout.add_widget(self.bouton_fin)
+        
+    def debut_gps(self, instance):
+        """Fonction permettant le début d'un enregistrement gps sans limite de temps fixe"""
+        
+        self.attente_gps = Label(text = "En attente des positions GPS")
+        self.layout.add_widget(self.attente_gps)
+        gps.configure(on_location=self.recup_donnees_gps)
+        gps.start()
+        #self.event = Clock.schedule_interval(self.recup_donnees_gps, 1)
+        self.timestamp_debut = time() 
+        
+    def recup_donnees_gps(self, **kwargs):
+        self.attente_gps.text = '\n'.join(['{}={}'.format(k, v) for k, v in kwargs.items()])
+        longitude=kwargs.get('lon')
+        latitude=kwargs.get('lat')
+        altitude=kwargs.get('altitude')
+        speed=kwargs.get('speed')
+        accuracy=kwargs.get('accuracy')
+        bearing=kwargs.get('bearing')
+        timestamp=time()
+        
+        data = {'longitude': longitude, 'latitude': latitude, 'altitude': altitude,'timestamp': timestamp, 'speed': speed, 'bearing': bearing, 'accuracy' : accuracy}
+
+        headers = {'Content-Type': 'application/json'}
+
+      
+        UrlRequest(url='http://irioso.free.fr/Ambrasobin/recup_donnees.php', req_body=json.dumps(data),  req_headers=headers, on_success=self.on_success)
+        
+    def on_success(self, request, result):
+        #self.label = Label(text=result)
+        pass
+        
+        
+    
+    def fin_gps(self, instance):
+        """Fonction permettant la fin d'un enregistrement gps sans limite de temps fixe"""
+        #A construire/ Doit permettre d'afficher les sous-transports et de comparer avec ceux rentrer par l'utilisateur
+        gps.stop()
+        self.layout.clear_widgets()
+        self.title = "Voila les moyens de transport que vous avez utilisé"
+        self.timestamp_fin=time()
+        
+        data = {'timestamp_debut': self.timestamp_debut, 'timestamp_fin': self.timestamp_fin}
+        
+        headers = {'Content-Type': 'application/json'}
+
+      
+        UrlRequest(url='http://irioso.free.fr/Ambrasobin/deter_moyen.php', req_body=json.dumps(data),  req_headers=headers, on_success=self.get_result)
+        
+    def get_result(self, requete, resultat):
+        # for key, value in requete.resp_headers.items():
+        #     return('{}: {}'.format(key, value))
+         self.label = Label(text=resultat)
+         self.layout.add_widget(self.label)
+         
+        
+        
+    def lieux_interet (self, **kwargs) : 
+        """Fonction permettant d'enregistrer les points d'intérêts traverser sur un trajet donné"""
+        liste_lieux_visités = []
+        #récupérer les données GPS des lieux d'intérêt avec leur nom de la BD 
+        UrlRequest('http://irioso.free.fr/Groupe_1/lieu_d_interet_local.php', on_success = self.recup_lieux)
+        #Comparer la dernière valeur de donnée avec chacune des données des points d'intérêts
+        #->Fonction distance entre deux points php et comparaison au rayon de chaque point
+        for i in range(0, len(self.tableau_lieux_interet)): 
+            #if distance(point_actuel, tableau_lieux_interet[i])< rayon : 
+                liste_lieux_visités.append(self.tableau_lieux_interet[i])
+        #Si on est dans le rayon d'un point d'intérêt 
+        print('Bonjour')
+    
+    def recup_lieux (self, request, result):
+        """Fonction de récupération des points d'intérêt, chaque données les concernant est stockées sous forme de tableaux"""
+        self.tableau_lieux_interet = json.loads(result)['noms_lieux']
+        self.tableau_id_lieux = json.loads(result)['id_lieux']
+        self.tableau_latitudes = json.loads(result)['latitudes']
+        self.tableau_longitudes= json.loads(result)['longitudes']
+        self.label_lieux_interet= Label(text= self.tableau_lieux_interet)
+        
+        self.layout.add_widget(self.label_lieux_interet)
+        latitude1 = 18
+        longitude1 = 21
+        latitude2 = 32
+        longitude2 = 44
+        #encodage des informations à transmettre
+        req_body = json.dumps({'lat1':latitude1, 'long1':longitude1, 'lat2': latitude2, 'long2': longitude2})
+        req_method = 'POST'
+        
+        UrlRequest(url='http://localhost:8888/distance.php',req_body = req_body,method=req_method, on_success = self.distance_interet)
+        
+    def distance_interet(self, request, result):
+        self.label_distance = Label(text= result)
+        self.layout.add_widget(self.label_distance)
+    
+if __name__ == '__main__':
+    
+    MyApp().run()  et les php utiles <?php
+
+///FONCTIONS
+//on souhaite connaitre notre localisation a un timestamp donné qui n'exista pas forcément dans la base de donnees
+
+//recuperation du timestamp existant juste avant le timestamp donne
+function maxi_timestamp($n,$groupe,$connexion){
+	$req = "select timestamp from data_gps where id_phone= ".$groupe." and timestamp<=".$n." order by timestamp desc"  ;
+	$result = mysqli_query($connexion, $req);
+	if($result){
+ 
+       
+        $row = $result->fetch_array(MYSQLI_ASSOC);
+        return $row["timestamp"] ;
+    }
+   
+}
+//recuperation du timestamp existant juste apres le timestamp donne
+function mini_timestamp($n,$groupe,$connexion){
+	$req = "select timestamp from data_gps where id_phone= ".$groupe." and timestamp>=".$n." order by timestamp asc"  ;
+	$result = mysqli_query($connexion, $req);
+	if($result){
+ 
+      
+        $row = $result->fetch_array(MYSQLI_ASSOC);
+        return $row["timestamp"] ;
+    }
+
+}
+//renvoie notre localisation a un timestamp qui existe dans la base de donnees
+function localisation($n,$groupe,$connexion){
+	$req="select longitude,latitude from data_gps where id_phone= ".$groupe." and timestamp= ".$n;
+	$result = mysqli_query($connexion, $req);
+	if($result){
+ 
+       
+        $row = $result->fetch_array(MYSQLI_ASSOC);
+        return [$row["longitude"], $row["latitude"]];
+       	 	
+    }
+  
+}
+
+
+//renvoie la distance entre deux points donnes à partir de leurs coordonnées
+function distance($lat1, $lng1, $lat2, $lng2, $unit = 'k') {
+        $earth_radius = 6378137;   // Terre = sphère de 6378km de rayon
+        $rla1 = deg2rad($lat1);
+        $rlo1 = deg2rad($lng1);
+        $rla2 = deg2rad($lat2);
+        $rlo2 = deg2rad($lng2);
+        $dlo = ($rlo2 - $rlo1) / 2;
+        $dla = ($rla2 - $rla1) / 2;
+        $a = (sin($dla) * sin($dla)) + cos($rla1) * cos($rla2) * (sin($dlo) * sin($dlo));
+        $d = 2 * atan2(sqrt($a), sqrt(1 - $a));
+        //
+        $meter = ($earth_radius * $d);
+        if ($unit == 'k') {
+            return $meter / 1000;
+        }
+        return $meter; // ditance en km
+    }
+//renvoie les cordonnees associées au timestamp (pas forcément existant) donné
+function position_x($n, $groupe,$connexion){
+	$maxt=maxi_timestamp($n,$groupe,$connexion);
+	$mint=mini_timestamp($n,$groupe,$connexion);
+	$loc_maxt= localisation($maxt,$groupe,$connexion);
+	$loc_mint= localisation($mint,$groupe,$connexion);
+	$distance= distance($loc_maxt[1], $loc_maxt[0], $loc_mint[1], $loc_mint[0], $unit = 'k');
+	$duree=$maxt-$mint;
+	if ($duree == 0 || $distance == 0) {
+		$localisation=localisation($n,$groupe,$connexion);
+		// print($localisation);
+		return;
+	}
+	$duree_x=$n-$maxt;
+	$distance_x=$duree_x*$distance/$duree;
+	$longitude_x=($distance_x/$distance)*($loc_mint[0]-$loc_maxt[0])+$loc_maxt[0];
+	$latitude_x=($distance_x/$distance)*($loc_mint[1]-$loc_maxt[1])+$loc_maxt[1];
+	//echo "Position interpolée au timestamp $n : longitude : $longitude_x, latitude : $latitude_x<br>";
+	return [$n,$longitude_x,$latitude_x];
+	
+}
+
+	
+/// calcule la vitesse en km/h entre un timestamp et 10sec plus tard
+
+function vitesse($n,$groupe,$connexion){
+	$mint=mini_timestamp($n,$groupe,$connexion);
+	$mint10=mini_timestamp($n+10,$groupe,$connexion);
+	$loc_mint= localisation($mint,$groupe,$connexion);
+	$loc_mint10= localisation($mint10,$groupe,$connexion);
+	$distance= distance($loc_mint10[1], $loc_mint10[0], $loc_mint[1], $loc_mint[0], $unit = 'k');
+	$duree=$mint10-$mint;
+	if ($duree == 0 || $distance == 0) {
+		// echo "Position fixe (aucun mouvement ou même timestamp).<br>";
+		return;
+	}
+	$vitesse=$distance/$duree*3600;
+	 // vitesse en km/h
+	return $vitesse;
+}
+
+
+/// renvoie un tableau associatif avec comme clé le timestamp du début et comme valeur le moyen de transport utilisé pour un intervalle de 10sec suivant le timestamp
+function deter_moyen($n1,$n2,$groupe,$connexion){
+	$n=$n1;
+	$moyen= array();
+	while ($n<=$n2) {
+		$v=vitesse($n,$groupe,$connexion);  // vitesse en km/h
+		if ($v<=1){
+			$moyen[$n]='arret';
+		}
+		elseif ($v<=6){
+			$moyen[$n]='marche';
+		}
+		elseif ($v<=15){
+			$moyen[$n]='course';
+		}
+		elseif ($v<=25){
+			$moyen[$n]='velo';
+		}
+		elseif($v>25){
+			$moyen[$n]='bus';
+		}
+		$n+=10;
+	}
+	// print_r($moyen);
+	//print('<br>') ; 
+	$m=$n1;
+	intervalle_transport($m,$moyen,$connexion);
+}
+/// Renvoie un tableau avec le timestamps de début d'utilisation d'un moyen de transport, puis quand ca change de moyen : nouvelle clé qui correspond au timestamp de changement de moyen associé au nouveau moyen comme valeur
+function intervalle_transport($n,$tab,$connexion){
+	$moyen0=$tab[$n];
+	$tab_change=array();
+	$tab_change[$n]=$moyen0;
+	foreach($tab AS $cle => $valeur) {
+		if ($valeur!=$moyen0){
+			$tab_change[$cle]=$valeur;
+			$moyen0=$valeur;
+		}
+	}
+    echo json_encode($tab_change);
+    // print_r($tab_change);	
+		
+}		
+		
+		
+		
+	
+
+///PROGRAMME PRINCIPAL
+function main() {
+
+	$URL = "irioso.sql.free.fr" ;
+	$user = "irioso" ;
+	$password = "963364" ;
+	$db_name = "irioso" ;
+
+	$groupe = 1 ;
+	
+	$json = file_get_contents('php://input');
+	$obj = json_decode($json);
+	
+	$n1 = $obj->timestamp_debut ;
+	$n2 = $obj->timestamp_fin ; 
+	
+	
+
+	$connexion = mysqli_connect($URL,$user,$password,$db_name);
+	header('Content-Type: application/json');
+
+
+	if(mysqli_errno($connexion)){
+		echo('La connexion a échouée ! ');
+	}
+	
+      
+
+
+
+	deter_moyen($n1 ,$n2 ,$groupe,$connexion);
+	mysqli_commit($connexion) ;
+    mysqli_close($connexion);
+}
+
+main() ;    
+	
+?>
