@@ -91,7 +91,7 @@ class MyApp(App):
         self.trajet = Button(text="Ajouter un trajet et determiner les moyens de transport", color=[1,1,1,1], background_normal = "", background_color = [0.16,0.42,0.17,1])
         self.trajet.bind(on_press=self.ajout_trajet)
         self.nouveau_depart = Button(text="Deviner le moyen de transport que j'utilise")
-        self.trajet.bind(on_press=self.un_ajout_trajet)
+        self.nouveau_depart.bind(on_press=self.un_ajout_trajet)
         self.layout.add_widget(self.choix_donnees)       
         self.layout.add_widget(self.arbre)
         self.layout.add_widget(self.trajet)
@@ -180,7 +180,7 @@ class MyApp(App):
         
         self.label=Label(text="Nous avons estimé que vous avez utilisé le \n moyen de transport suivant : ")
         self.layout.add_widget(self.label)
-        self.label=Label(text=self.un_moyen_estime.text)
+        self.label=Label(text=self.un_moyen_estime)
         self.layout.add_widget(self.label)
             
         self.label=Label(text= "\n\n Vous avez déclaré avoir utilisé le moyen suivant : \n")
