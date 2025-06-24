@@ -1,4 +1,5 @@
 
+
 # -*- coding: utf-8 -*-
 """
 Spyder Editor
@@ -87,11 +88,15 @@ class MyApp(App):
         self.choix_donnees = Label(text="Veux-tu ajouter un arbre ou un trajet ?")
         self.arbre = Button(text="Ajouter un arbre", color=[1,1,1,1], background_normal = "", background_color = [0.16,0.42,0.17,1])
         self.arbre.bind(on_press=self.ajout_arbre)
-        self.trajet = Button(text="Ajouter un trajet", color=[1,1,1,1], background_normal = "", background_color = [0.16,0.42,0.17,1])
+        self.trajet = Button(text="Ajouter un trajet et determiner les moyens de transport", color=[1,1,1,1], background_normal = "", background_color = [0.16,0.42,0.17,1])
         self.trajet.bind(on_press=self.ajout_trajet)
+        self.nouveau_depart = Button(text="Deviner le moyen de transport que j'utilise")
+        self.trajet.bind(on_press=self.un_ajout_trajet)
         self.layout.add_widget(self.choix_donnees)       
         self.layout.add_widget(self.arbre)
         self.layout.add_widget(self.trajet)
+        self.layout.add_widget(self.nouveau_depart)
+        
         
     def ajout_arbre(self, instance):
         """Construction de la page pour ajouter un arbre"""
@@ -119,6 +124,72 @@ class MyApp(App):
         self.layout.add_widget(self.demande_essence_arbre)
         self.timestamp_arbre = time() 
         #Manque l'envoie à la BD
+        
+        
+    def un_ajout_trajet(self, instance):
+        """"Construction de la page pour ajouter un trajet"""
+        self.layout.clear_widgets()
+        self.title = "Ambrasobin - Page Trajet"
+        self.un_bouton_debut = Button(text="Début")
+        self.un_bouton_fin = Button(text="Fin")
+        
+        #Ajouter les rôles des boutons début et fin
+        self.un_bouton_debut.bind(on_press = self.un_debut_gps)
+        self.un_bouton_fin.bind(on_press = self.un_fin_gps)
+        
+        self.layout.add_widget(self.un_bouton_debut)
+        self.layout.add_widget(self.un_bouton_fin)
+        
+    def un_debut_gps(self, instance):
+        """Fonction permettant le début d'un enregistrement gps sans limite de temps fixe"""
+        
+        self.attente_gps = Label(text = "En attente des positions GPS")
+        self.layout.add_widget(self.attente_gps)
+        gps.configure(on_location=self.recup_donnees_gps)
+        gps.start()
+        self.timestamp_debut = time() 
+               
+    
+    def un_fin_gps(self, instance):
+        """Fonction permettant la fin d'un enregistrement gps sans limite de temps fixe"""
+        #A construire/ Doit permettre d'afficher les sous-transports et de comparer avec ceux rentrer par l'utilisateur
+        gps.stop()
+        self.layout.clear_widgets()
+        self.title = "Voila le moyen de transport que vous avez utilisé"
+        self.timestamp_fin=time()
+        
+        data = {'timestamp_debut': self.timestamp_debut, 'timestamp_fin': self.timestamp_fin}
+        
+        headers = {'Content-Type': 'application/json'}
+
+      
+        UrlRequest(url='http://irioso.free.fr/Ambrasobin/deter_un_moyen.php', req_body=json.dumps(data),  req_headers=headers, on_success=self.un_get_result)
+        
+    def un_get_result(self, requete, resultat):
+       
+        self.moyen_donne = Label(text="Quel moyen de transport avez-vous utilisé ?")
+        self.layout.add_widget(self.moyen_donne)
+        self.un_moyen_input = TextInput(hint_text="Moyen 1")
+        self.layout.add_widget(self.un_moyen_input)
+        self.button=Button(text="Entrer", on_press=self.un_envoi_moy)
+        self.layout.add_widget(self.button)
+        self.un_moyen_estime=resultat
+        
+    def un_envoi_moy(self, instance):
+        self.layout.clear_widgets()
+        
+        self.label=Label(text="Nous avons estimé que vous avez utilisé le \n moyen de transport suivant : ")
+        self.layout.add_widget(self.label)
+        self.label=Label(text=self.un_moyen_estime.text)
+        self.layout.add_widget(self.label)
+            
+        self.label=Label(text= "\n\n Vous avez déclaré avoir utilisé le moyen suivant : \n")
+        self.layout.add_widget(self.label)
+        self.label=Label(text=self.un_moyen_input.text)
+        self.layout.add_widget(self.label)  
+        
+        
+        
         
     def ajout_trajet(self, instance):
         """"Construction de la page pour ajouter un trajet"""
