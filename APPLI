@@ -141,7 +141,6 @@ class MyApp(App):
         self.layout.add_widget(self.attente_gps)
         gps.configure(on_location=self.recup_donnees_gps)
         gps.start()
-        #self.event = Clock.schedule_interval(self.recup_donnees_gps, 1)
         self.timestamp_debut = time() 
         
     def recup_donnees_gps(self, **kwargs):
@@ -188,18 +187,44 @@ class MyApp(App):
         self.layout.add_widget(self.moyen_donne)
         self.moyen_input = TextInput(hint_text="Moyen 1, Moyen 2,...")
         self.layout.add_widget(self.moyen_input)
-        #self.button=Button(text="Entrer", on_press=self)
-        #self.layout.add_widget(self.button)
-        liste_moyens_estimes=[]
-        
-        for valeur in resultat.values():
-            print(valeur)
-            liste_moyens_estimes.append(valeur)
+        self.button=Button(text="Entrer", on_press=self.envoi_moy)
+        self.layout.add_widget(self.button)
+        if resultat[-1]!="}":
+            resultat+="}"
+        data=json.loads(resultat)
+        self.liste_moyens_estimes=[]
+        for valeur in data.values():
+            self.liste_moyens_estimes.append(valeur)
             
+        self.liste_timestamp=[]
+        for cle in data.keys():
+            self.liste_timestamp.append(float(cle))
+        self.liste_timestamp.append(self.timestamp_fin)
         
         
-        self.label = Label(text=str(liste_moyens_estimes))
+    def envoi_moy(self, instance):
+        self.layout.clear_widgets()
+        
+        self.label=Label(text="Nous avons estimé que vous avez utilisé les \n moyens de transport suivants : ")
         self.layout.add_widget(self.label)
+        for i in range(len(self.liste_moyens_estimes)):
+            self.duree = self.liste_timestamp[i+1] - self.liste_timestamp[i]
+            self.label = Label(text=self.liste_moyens_estimes[i] + " pendant " + str(int(self.duree)) + " secondes\n")
+
+            self.layout.add_widget(self.label)
+            
+        self.label=Label(text= "\n\n Vous avez déclaré avoir utilisé les moyens suivants : \n")
+        self.layout.add_widget(self.label)
+        if "," in self.moyen_input.text :
+            moyens_decl=self.moyen_input.text.split(",")
+        else :
+            moyens_decl=[self.moyen_input.text]
+        for i in range(len(moyens_decl)):
+            self.label=Label(text=moyens_decl[i])
+            self.layout.add_widget(self.label)
+        
+        
+        
         
         
     def lieux_interet (self, **kwargs) : 
