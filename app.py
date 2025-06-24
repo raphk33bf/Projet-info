@@ -133,25 +133,25 @@ class MyApp(App):
         self.layout.add_widget(self.essence_arbre)
         self.demande_essence_arbre = TextInput()
         self.layout.add_widget(self.demande_essence_arbre)
-        self.essence_arbre = self.demande_essence_arbre.text
+        
 
         self.circonference_arbre = Label(text="Quel est la circonference de l'arbre ?")
         self.layout.add_widget(self.circonference_arbre)
         self.demande_circonference_arbre = TextInput()
         self.layout.add_widget(self.demande_circonference_arbre)
-        self.circonference_arbre = self.demande_circonference_arbre.text
+        
 
         self.mort_arbre = Label(text="Quel est l'état de l'arbre (0 mort, 1 vivant) ?")
         self.layout.add_widget(self.mort_arbre)
         self.demande_mort_arbre = TextInput()
         self.layout.add_widget(self.demande_mort_arbre)
-        self.mort_arbre = self.demande_mort_arbre.text
+        
 
         self.nom_img = Label(text="nom de l'image ?")
         self.layout.add_widget(self.nom_img)
         self.demande_nom_img = TextInput()
         self.layout.add_widget(self.demande_nom_img)
-        self.nom_img = self.demande_nom_img.text
+        
 
         self.timestamp_arbre = time()
         
@@ -162,14 +162,14 @@ class MyApp(App):
 
     def envoi_arbre(self, instance):
         req_body = json.dumps({
-            'essence': self.essence_arbre,
-            'circonference': self.circonference_arbre,
-            'mort': self.mort_arbre,
+            'essence': self.demande_essence_arbre.text,
+            'circonference': self.demande_circonference_arbre.text,
+            'mort': self.demande_mort_arbre.text,
             'id_groupe': self.id_grp,
             'lat': self.lat,
             'long': self.long,
             'timestamp': self.timestamp_arbre,
-            'nom_img': self.nom_img
+            'nom_img': self.demande_nom_img.text,
         })
 
         req_method = 'POST'
