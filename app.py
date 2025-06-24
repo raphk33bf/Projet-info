@@ -119,8 +119,12 @@ class MyApp(App):
         self.layout.add_widget(self.message)
         # retour à la page principale
         self.bouton_retour = Button(text="Retour à la page principale")
-        self.bouton_retour.bind(on_press=self.page_principale)
+        self.bouton_retour.bind(on_press=self.retour_page_principale)
         self.layout.add_widget(self.bouton_retour)
+    
+    def retour_page_principale(self, instance):
+        # Tu peux rappeler la page principale sans arguments réseau
+        self.page_principale(None, '{"id": %d, "id_groupe": %d}' % (self.id, self.id_grp))
 
     def enregistrement_nv_arbre(self, instance):
         self.layout.clear_widgets()
@@ -129,37 +133,45 @@ class MyApp(App):
         self.layout.add_widget(self.essence_arbre)
         self.demande_essence_arbre = TextInput()
         self.layout.add_widget(self.demande_essence_arbre)
-        essence_arbre = self.demande_essence_arbre.text
+        self.essence_arbre = self.demande_essence_arbre.text
 
         self.circonference_arbre = Label(text="Quel est la circonference de l'arbre ?")
         self.layout.add_widget(self.circonference_arbre)
         self.demande_circonference_arbre = TextInput()
         self.layout.add_widget(self.demande_circonference_arbre)
-        circonference_arbre = self.demande_circonference_arbre.text
+        self.circonference_arbre = self.demande_circonference_arbre.text
 
         self.mort_arbre = Label(text="Quel est l'état de l'arbre (0 mort, 1 vivant) ?")
         self.layout.add_widget(self.mort_arbre)
         self.demande_mort_arbre = TextInput()
         self.layout.add_widget(self.demande_mort_arbre)
-        mort_arbre = self.demande_mort_arbre.text
+        self.mort_arbre = self.demande_mort_arbre.text
 
         self.nom_img = Label(text="nom de l'image ?")
         self.layout.add_widget(self.nom_img)
         self.demande_nom_img = TextInput()
         self.layout.add_widget(self.demande_nom_img)
-        nom_img = self.demande_nom_img.text
+        self.nom_img = self.demande_nom_img.text
 
-        timestamp_arbre = time()
+        self.timestamp_arbre = time()
+        
+        self.bouton_envoi = Button(text="Enregistrer l'arbre")
+        self.bouton_envoi.bind(on_press=self.envoi_arbre)
+        self.layout.add_widget(self.bouton_envoi)
+        
+
+    def envoi_arbre(self, instance):
         req_body = json.dumps({
-            'essence': essence_arbre,
-            'circonference': circonference_arbre,
-            'mort': mort_arbre,
+            'essence': self.essence_arbre,
+            'circonference': self.circonference_arbre,
+            'mort': self.mort_arbre,
             'id_groupe': self.id_grp,
             'lat': self.lat,
             'long': self.long,
-            'timestamp': timestamp_arbre,
-            'nom_img': nom_img
+            'timestamp': self.timestamp_arbre,
+            'nom_img': self.nom_img
         })
+
         req_method = 'POST'
         UrlRequest('http://irioso.free.fr/Groupe_1/ajout_arbre.php', req_body=req_body, method=req_method, on_success=self.message_arbre)
 
