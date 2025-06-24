@@ -169,24 +169,35 @@ class MyApp(App):
        
         self.moyen_donne = Label(text="Quel moyen de transport avez-vous utilisé ?")
         self.layout.add_widget(self.moyen_donne)
-        self.un_moyen_input = TextInput(hint_text="Moyen 1")
-        self.layout.add_widget(self.un_moyen_input)
+        self.nom_dec = TextInput(hint_text="Moyen 1")
+        self.layout.add_widget(self.nom_dec)
         self.button=Button(text="Entrer", on_press=self.un_envoi_moy)
         self.layout.add_widget(self.button)
-        self.un_moyen_estime=resultat
+        self.nom_est=resultat
         
     def un_envoi_moy(self, instance):
         self.layout.clear_widgets()
         
         self.label=Label(text="Nous avons estimé que vous avez utilisé le \n moyen de transport suivant : ")
         self.layout.add_widget(self.label)
-        self.label=Label(text=self.un_moyen_estime)
+        self.label=Label(text=self.nom_est)
         self.layout.add_widget(self.label)
             
         self.label=Label(text= "\n\n Vous avez déclaré avoir utilisé le moyen suivant : \n")
         self.layout.add_widget(self.label)
-        self.label=Label(text=self.un_moyen_input.text)
+        self.label=Label(text=self.nom_dec.text)
         self.layout.add_widget(self.label)  
+        
+        data = {'timestamp_debut': self.timestamp_debut, 'timestamp_fin': self.timestamp_fin, 'nom_est': self.nom_est,'nom_dec': self.nom_dec}
+
+        headers = {'Content-Type': 'application/json'}
+
+      
+        UrlRequest(url='http://irioso.free.fr/Ambrasobin/insert_trajet.php', req_body=json.dumps(data),  req_headers=headers, on_success=self.on_success)
+        
+    def on_success(self, request, result):
+        #self.label = Label(text=result)
+        pass
         
         
         
