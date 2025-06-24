@@ -46,31 +46,32 @@ class MyApp(App):
 
     def page_principale(self, request, result): 
         """Page de choix de l'action : enregistrement d'un arbre ou d'un trajet"""
-        data = json.loads(result)
-        if 'id' in data and 'id_groupe' in data:
-            self.id = data['id']
-            self.id_grp = data['id_groupe']
-        else:
+         
+        try  :
+            self.id = json.loads(result)['id']
+        except :
+            self.erreur = json.loads(result)['error']
+            self.bouton_erreur = Button(text="Mauvaise Personne. Recommencer !")
+            self.bouton_erreur.bind(on_press = self.reidentification)
+            self.layout.add_widget(self.bouton_erreur)
+        else : 
+            self.id = json.loads(result)['id']
+            self.id_grp = json.loads(result)['id_groupe']
+        
+        
+        
             self.layout.clear_widgets()
-            self.title = "Erreur de connexion"
-            self.erreur_label = Label(text="Erreur de connexion, veuillez réessayer.")
-            self.layout.add_widget(self.erreur_label)
-            self.bouton_reessayer = Button(text="Réessayer")
-            self.bouton_reessayer.bind(on_press=self.fen)
-            self.layout.add_widget(self.bouton_reessayer)
-
-        self.layout.clear_widgets()
-        self.title = "Ambrasobin - Page principale"
-        self.titre_page_principale = Label(text="Bienvenue sur la page principale !", underline=True, font_size='50sp', markup=True, color=[0.16, 0.42, 0.17, 1])
-        self.layout.add_widget(self.titre_page_principale)
-        self.choix_donnees = Label(text="Veux-tu ajouter un arbre ou un trajet ?")
-        self.arbre = Button(text="Ajouter un arbre", color=[1, 1, 1, 1], background_normal="", background_color=[0.16, 0.42, 0.17, 1])
-        self.arbre.bind(on_press=self.page_arbre)
-        self.trajet = Button(text="Ajouter un trajet", color=[1, 1, 1, 1], background_normal="", background_color=[0.16, 0.42, 0.17, 1])
-        self.trajet.bind(on_press=self.ajout_trajet)
-        self.layout.add_widget(self.choix_donnees)
-        self.layout.add_widget(self.arbre)
-        self.layout.add_widget(self.trajet)
+            self.title = "Ambrasobin - Page principale"
+            self.titre_page_principale = Label(text="Bienvenue sur la page principale !", underline=True, font_size='50sp', markup=True, color=[0.16, 0.42, 0.17, 1])
+            self.layout.add_widget(self.titre_page_principale)
+            self.choix_donnees = Label(text="Veux-tu ajouter un arbre ou un trajet ?")
+            self.arbre = Button(text="Ajouter un arbre", color=[1, 1, 1, 1], background_normal="", background_color=[0.16, 0.42, 0.17, 1])
+            self.arbre.bind(on_press=self.page_arbre)
+            self.trajet = Button(text="Ajouter un trajet", color=[1, 1, 1, 1], background_normal="", background_color=[0.16, 0.42, 0.17, 1])
+            self.trajet.bind(on_press=self.ajout_trajet)
+            self.layout.add_widget(self.choix_donnees)
+            self.layout.add_widget(self.arbre)
+            self.layout.add_widget(self.trajet)
 
         
 
