@@ -73,7 +73,8 @@ class MyApp(App):
             self.layout.add_widget(self.arbre)
             self.layout.add_widget(self.trajet)
 
-        
+    def reidentification(self, instance):
+        self.fen()
 
     def page_arbre(self, instance, **kwargs):
         """Construction de la page pour ajouter un arbre"""
