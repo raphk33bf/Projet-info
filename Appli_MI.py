@@ -44,7 +44,7 @@ class MyApp(App):
         
         return self.layout
     
-    def fen(self): 
+   def fen(self): 
         """Création de la page permettant la connexion"""
         self.layout.clear_widgets()  
         self.nom_texte = Label(text="Quel est ton nom ?")
@@ -69,7 +69,7 @@ class MyApp(App):
         req_body = json.dumps({'nom':nom, 'prenom':prenom})
         req_method = 'POST'
         
-        UrlRequest('http://irioso.free.fr/Groupe_1/recup_id.php', req_body = req_body,method=req_method,  on_success = self.page_principale)
+        UrlRequest('http://irioso.free.fr/Groupe_1/recup_id.php', req_body = req_body, method=req_method,  on_success = self.page_principale)
         
         
            
@@ -77,8 +77,13 @@ class MyApp(App):
 
         """Page de choix de l'action : enregistrement d'un arbre ou d'un trajet"""
 
-        self.id=json.loads(result)['id']
-        self.id_grp=json.loads(result)['id_groupe']
+        data = json.loads(result)
+        if 'id' in data and 'id_groupe' in data:
+            self.id = data['id']
+            self.id_grp = data['id_groupe']
+        else:
+            print("Erreur côté PHP :", data.get('error', 'Réponse inattendue'))
+        
 
         self.layout.clear_widgets()
         self.title = "Ambrasobin - Page principale"
@@ -86,14 +91,14 @@ class MyApp(App):
         self.layout.add_widget(self.titre_page_principale)
         self.choix_donnees = Label(text="Veux-tu ajouter un arbre ou un trajet ?")
         self.arbre = Button(text="Ajouter un arbre", color=[1,1,1,1], background_normal = "", background_color = [0.16,0.42,0.17,1])
-        self.arbre.bind(on_press=self.arbre)
+        self.arbre.bind(on_press=self.page_arbre)
         self.trajet = Button(text="Ajouter un trajet", color=[1,1,1,1], background_normal = "", background_color = [0.16,0.42,0.17,1])
         self.trajet.bind(on_press=self.ajout_trajet)
         self.layout.add_widget(self.choix_donnees)       
         self.layout.add_widget(self.arbre)
         self.layout.add_widget(self.trajet)
         
-    def arbre(self, instance, kwargs):
+    def page_arbre(self, instance, **kwargs):
         """Construction de la page pour ajouter un arbre"""
         self.layout.clear_widgets()
         self.title = "Ambrasobin - Page Arbre"
@@ -118,11 +123,11 @@ class MyApp(App):
     
     def verification_arbre(self, request, result):
         booleen = json.loads(result)['booleen']
-        if boolenn==True:
+        if booleen==True:
 
             id_arbre = json.loads(result)['id']
 
-            req_body = json.dumps({'long':long, 'lat':lat, 'id':id_arbre})
+            req_body = json.dumps({'long':self.long, 'lat':self.lat, 'id':id_arbre})
             req_method = 'POST'
             UrlRequest('http://irioso.free.fr/Groupe_1/MAJ_arbre.php', req_body = json.dumps({'id':id_arbre}), method='POST', on_success=self.message_arbre)
         else :
@@ -174,7 +179,7 @@ class MyApp(App):
        
         timestamp_arbre = time()
         
-        req_body = json.dumps({'essence':essence_arbre, 'circonference':circonference_arbre, 'mort':mort_arbre, 'id_groupe':self.id_grp, 'lat':lat, 'long':long, 'timestamp':timestamp_arbre, 'nom_img': nom_img})
+        req_body = json.dumps({'essence':essence_arbre, 'circonference':circonference_arbre, 'mort':mort_arbre, 'id_groupe':self.id_grp, 'lat':self.lat, 'long':self.long, 'timestamp':timestamp_arbre, 'nom_img': nom_img})
         req_method = 'POST'
         UrlRequest('http://irioso.free.fr/Groupe_1/ajout_arbre.php', req_body = req_body, method=req_method, on_success=self.message_arbre)
         
