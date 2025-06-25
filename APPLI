@@ -1,5 +1,3 @@
-
-
 # -*- coding: utf-8 -*-
 """
 Spyder Editor
@@ -31,6 +29,9 @@ from kivy.clock import Clock
 from kivy.network.urlrequest import UrlRequest
 from time import time
 from plyer import gps
+from datetime import datetime, date
+import time
+import requests
 import json
 
 
@@ -88,14 +89,17 @@ class MyApp(App):
         self.choix_donnees = Label(text="Veux-tu ajouter un arbre ou un trajet ?")
         self.arbre = Button(text="Ajouter un arbre", color=[1,1,1,1], background_normal = "", background_color = [0.16,0.42,0.17,1])
         self.arbre.bind(on_press=self.ajout_arbre)
-        self.trajet = Button(text="Ajouter un trajet et determiner les moyens de transport", color=[1,1,1,1], background_normal = "", background_color = [0.16,0.42,0.17,1])
+        self.trajet = Button(text="Bonus - Demarrer un trajet et determiner \nles moyens de transport utilisés", color=[1,1,1,1], background_normal = "", background_color = [0.16,0.42,0.17,1])
         self.trajet.bind(on_press=self.ajout_trajet)
-        self.nouveau_depart = Button(text="Deviner le moyen de transport que j'utilise")
+        self.nouveau_depart = Button(text="Demarrer un trajet et determiner \nle moyen de transport utilisé")
         self.nouveau_depart.bind(on_press=self.un_ajout_trajet)
+        self.trajet_journee = Button(text="Determiner les moyens de transports \n utilisés sur une période de la journée")
+        self.trajet_journee.bind(on_press=self.ajout_trajet_journee)
         self.layout.add_widget(self.choix_donnees)       
         self.layout.add_widget(self.arbre)
-        self.layout.add_widget(self.trajet)
         self.layout.add_widget(self.nouveau_depart)
+        self.layout.add_widget(self.trajet_journee)
+        self.layout.add_widget(self.trajet)
         
         
     def ajout_arbre(self, instance):
@@ -124,6 +128,45 @@ class MyApp(App):
         self.layout.add_widget(self.demande_essence_arbre)
         self.timestamp_arbre = time() 
         #Manque l'envoie à la BD
+        
+        
+    def ajout_trajet_journee(self, instance):
+        self.horaire_donne = Label(text=" Sur quelle période voulez vous déterminer vos moyens de transport ?")
+        self.layout.add_widget(self.horaire_donne)
+        self.horaire_debut = TextInput(hint_text=" Horaire de début sous la forme h:min")
+        self.layout.add_widget(self.horaire_debut)
+        self.horaire_fin = TextInput(hint_text=" Horaire de fin sous la forme h:min")
+        self.layout.add_widget(self.horaire_fin)
+        self.button=Button(text="Entrer", on_press=self.envoi_horaire)
+        self.layout.add_widget(self.button)
+        
+    def envoi_horaire(self,instance):
+        # Récupère les horaires entrés
+        h_debut = self.horaire_debut.text.strip()
+        h_fin = self.horaire_fin.text.strip()
+    
+        # Récupère la date du jour
+        today = date.today()
+    
+        # Concatène date et heure, puis convertit en datetime
+        dt_debut = datetime.strptime(f"{today} {h_debut}", "%Y-%m-%d %H:%M")
+        dt_fin = datetime.strptime(f"{today} {h_fin}", "%Y-%m-%d %H:%M")
+    
+        # Convertit en timestamps
+        self.tt_debut = int(dt_debut.timestamp())
+        self.tt_fin = int(dt_fin.timestamp())
+        
+        data = {'tt_debut': self.tt_debut, 'tt_fin': self.tt_fin}
+
+        headers = {'Content-Type': 'application/json'}
+
+      
+        UrlRequest(url='http://irioso.free.fr/Ambrasobin/envoi_horaire.php', req_body=json.dumps(data),  req_headers=headers, on_success=self.on_success)
+        
+    def on_success(self, request, result):
+        #self.label = Label(text=result)
+        pass
+        
         
         
     def un_ajout_trajet(self, instance):
