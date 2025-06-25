@@ -44,36 +44,11 @@ function MAJ_arbre($id,$long,$lat){
     
             $req_update = 'UPDATE arbres SET latitude_estimee = ' . $lat_med . ', longitude_estimee = ' . $long_med . ' WHERE id = ' . $id;
             mysqli_query($connexion, $req_update);
-            echo('Mise à jour de l\'arbre avec ID ' . $id . ' effectuée avec succès.');
         } 
 
-        $req_max_id_obs = 'SELECT MAX(id_observations_arbres) AS max_id FROM observations_arbres';
-        $result_max_id_obs = mysqli_query($connexion, $req_max_id_obs);
+     }
 
-        if($result_max_id_obs){
-            $row_max_id = mysqli_fetch_array($result_max_id_obs, MYSQLI_ASSOC);
-            $max_id = $row_max_id['max_id'] + 1; // Incrémentation de l'ID pour la nouvelle observation
-
-            // Nouvelle liaison entre l'arbre et l'observation
-            $req_insert_id_obs= $connexion-> "INSERT INTO `details_arbres` (`id_arbres`, `id_observations_arbres`) VALUES ('1', '2')";
-            $req_insert_id_obs-> bind_param("ii", $id, $max_id);
-            $req_insert_id_obs->execute();
-
-
-            $req_update_obs = 'UPDATE observations_arbres SET latitude_estimee = ' . $lat . ', longitude_estimee = ' . $long . ' WHERE id = ' . $max_id;
-            mysqli_query($connexion, $req_update_obs);
-
-        
-        
-        else {
-            echo json_encode(array('error' => 'id !'));
-            return;
-        }
-
-       
-        }
-
-    }
+    
 
     mysqli_commit($connexion) ;
     mysqli_close($connexion);
