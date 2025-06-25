@@ -25,12 +25,9 @@ from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.textinput import TextInput
 from random import randint
-from kivy.clock import Clock
-from kivy.network.urlrequest import UrlRequest
 from time import time
 from plyer import gps
 from datetime import datetime, date
-import time
 import requests
 import json
 
@@ -132,7 +129,7 @@ class MyApp(App):
         
     def ajout_trajet_journee(self, instance):
         self.layout.clear_widgets()
-        self.horaire_donne = Label(text=" Sur quelle période voulez vous déterminer vos moyens de transport ?")
+        self.horaire_donne = Label(text=" Sur quelle période voulez vous\n déterminer vos moyens de transport ?")
         self.layout.add_widget(self.horaire_donne)
         self.horaire_debut = TextInput(hint_text=" Horaire de début sous la forme jj/mm/aaaa hh:mm")
         self.layout.add_widget(self.horaire_debut)
@@ -173,8 +170,58 @@ class MyApp(App):
         
     def success_horaire(self, request, result):
         self.layout.clear_widgets()
-        self.label=Label(text="Voici les moyens de transport que vous avez utilise du "+str(self.horaire_debut)+" au "+str(self.horaire_fin))
+        self.label=Label(text="Voici les moyens de transport que vous avez utilisé \n du  "+str(self.horaire_debut.text)+" au "+str(self.horaire_fin.text)+" : ")
         self.layout.add_widget(self.label)
+        
+        data = {'tt_debut': self.tt_debut, 'tt_fin': self.tt_fin}
+        
+        headers = {'Content-Type': 'application/json'}
+
+      
+        UrlRequest(url='http://irioso.free.fr/Ambrasobin/deter_moyen.php', req_body=json.dumps(data),  req_headers=headers, on_success=self.on_horaire)
+        
+    def on_horaire(self, requete, resultat):
+       
+        self.moyen_donne_h = Label(text="Quels moyens de transport avez-vous utilisé ?")
+        self.layout.add_widget(self.moyen_donne_h)
+        self.moyen_input_h = TextInput(hint_text="Moyen 1, Moyen 2,...")
+        self.layout.add_widget(self.moyen_input_h)
+        self.button=Button(text="Entrer", on_press=self.envoi_moy_h)
+        self.layout.add_widget(self.button)
+        if resultat[-1]!="}":
+            resultat+="}"
+        data=json.loads(resultat)
+        self.liste_moyens_estimes_h=[]
+        for valeur in data.values():
+            self.liste_moyens_estimes_h.append(valeur)
+            
+        self.liste_timestamp_h=[]
+        for cle in data.keys():
+            self.liste_timestamp_h.append(cle)
+        self.liste_timestamp_h.append(self.tt_fin)
+        
+        
+    def envoi_moy_h(self, instance):
+        self.layout.clear_widgets()
+        
+        self.label=Label(text="Nous avons estimé que vous avez utilisé les \n moyens de transport suivants : ")
+        self.layout.add_widget(self.label)
+        for i in range(len(self.liste_moyens_estimes_h)):
+            # self.duree_h = self.liste_timestamp_h[i+1] - self.liste_timestamp_h[i]
+            # self.label = Label(text=self.liste_moyens_estimes_h[i] + " pendant " + str(int(self.duree_h)) + " secondes\n")
+            self.label = Label(text=self.liste_moyens_estimes_h[i])
+            self.layout.add_widget(self.label)
+            
+        self.label=Label(text= "\n\n Vous avez déclaré avoir utilisé les moyens suivants : \n")
+        self.layout.add_widget(self.label)
+        if "," in self.moyen_input_h.text :
+            moyens_decl_h=self.moyen_input_h.text.split(",")
+        else :
+            moyens_decl_h=[self.moyen_input_h.text]
+        for i in range(len(moyens_decl_h)):
+            self.label=Label(text=moyens_decl_h[i])
+            self.layout.add_widget(self.label)
+        
         
         
         
