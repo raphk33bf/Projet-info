@@ -199,15 +199,20 @@ class MyApp(App):
         for cle in data.keys():
             self.liste_timestamp_h.append(cle)
         self.liste_timestamp_h.append(self.tt_fin)
+        self.debug_label = Label(text="Debug...")
+        self.layout.add_widget(self.debug_label)
+
         for i in range (len(self.liste_moyens_estimes_h)):
+            debug_text = f"i={i}\ndébut={self.liste_timestamp_h[i]}\nfin={self.liste_timestamp_h[i+1]}"
+            self.debug_label.text = debug_text
             self.moyen_ss_trajet= self.liste_moyens_estimes_h[i]
-            self.tt_debut_ss_trajet=self.liste_timestamp_h[i]
+            self.tt_debut_ss_trajet= self.liste_timestamp_h[i]
             self.tt_fin_ss_trajet=self.liste_timestamp_h[i+1]
-            data = {'moyen_ss_trajet':self.moyen_ss_trajet, 'tt_debut_ss_trajet': self.tt_debut_ss_trajet, 'tt_fin_ss_trajet': self.tt_fin_ss_trajet}
+            data = {'tt_debut': self.tt_debut,'tt_fin': self.tt_fin,'moyen_ss_trajet':self.moyen_ss_trajet, 'tt_debut_ss_trajet': self.tt_debut_ss_trajet, 'tt_fin_ss_trajet': self.tt_fin_ss_trajet}
             
             headers = {'Content-Type': 'application/json'}
             
-            UrlRequest(url='http://irioso.free.fr/Ambrasobin/insert_sous_trajet_detecte', req_body=json.dumps(data),  req_headers=headers, on_succes=self.on_success)
+            UrlRequest(url='http://irioso.free.fr/Ambrasobin/insert_sous_trajet_detecte', req_body=json.dumps(data),  req_headers=headers, on_success=self.on_success)
   
             
         
