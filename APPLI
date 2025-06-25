@@ -131,28 +131,36 @@ class MyApp(App):
         
         
     def ajout_trajet_journee(self, instance):
+        self.layout.clear_widgets()
         self.horaire_donne = Label(text=" Sur quelle période voulez vous déterminer vos moyens de transport ?")
         self.layout.add_widget(self.horaire_donne)
-        self.horaire_debut = TextInput(hint_text=" Horaire de début sous la forme h:min")
+        self.horaire_debut = TextInput(hint_text=" Horaire de début sous la forme jj/mm/aaaa hh:mm")
         self.layout.add_widget(self.horaire_debut)
-        self.horaire_fin = TextInput(hint_text=" Horaire de fin sous la forme h:min")
+        self.horaire_fin = TextInput(hint_text=" Horaire de fin sous la forme jj/mm/aaaa hh:mm")
         self.layout.add_widget(self.horaire_fin)
         self.button=Button(text="Entrer", on_press=self.envoi_horaire)
         self.layout.add_widget(self.button)
         
+    def heure_into_timestamp(self, string):
+        try:
+            clean_str = string.strip().replace('\n', '').replace('\r', '')
+            dt =datetime.strptime(clean_str, "%d/%m/%Y %H:%M")
+            return dt
+        except ValueError:
+            self.error_label.text = "Format invalide : jj/mm/aaaa hh:mm attendu"
+            return None
+        
     def envoi_horaire(self,instance):
-        # Récupère les horaires entrés
-        h_debut = self.horaire_debut.text.strip()
-        h_fin = self.horaire_fin.text.strip()
-    
-        # Récupère la date du jour
-        today = date.today()
-    
-        # Concatène date et heure, puis convertit en datetime
-        dt_debut = datetime.strptime(f"{today} {h_debut}", "%Y-%m-%d %H:%M")
-        dt_fin = datetime.strptime(f"{today} {h_fin}", "%Y-%m-%d %H:%M")
-    
-        # Convertit en timestamps
+       
+        # Conversion des textes en datetime
+        dt_debut = self.heure_into_timestamp(self.horaire_debut.text)
+        dt_fin = self.heure_into_timestamp(self.horaire_fin.text)
+
+        # Si une date n'est pas valide, on arrête
+        if dt_debut is None or dt_fin is None:
+            return
+
+        # Convertir datetime en timestamp UNIX (entier)
         self.tt_debut = int(dt_debut.timestamp())
         self.tt_fin = int(dt_fin.timestamp())
         
@@ -161,11 +169,12 @@ class MyApp(App):
         headers = {'Content-Type': 'application/json'}
 
       
-        UrlRequest(url='http://irioso.free.fr/Ambrasobin/envoi_horaire.php', req_body=json.dumps(data),  req_headers=headers, on_success=self.on_success)
+        UrlRequest(url='http://irioso.free.fr/Ambrasobin/envoi_horaire.php', req_body=json.dumps(data),  req_headers=headers, on_success=self.success_horaire)
         
-    def on_success(self, request, result):
-        #self.label = Label(text=result)
-        pass
+    def success_horaire(self, request, result):
+        self.layout.clear_widgets()
+        self.label=Label(text="Voici les moyens de transport que vous avez utilise du "+str(self.horaire_debut)+" au "+str(self.horaire_fin))
+        self.layout.add_widget(self.label)
         
         
         
