@@ -1,57 +1,52 @@
 <?php
 
-function distance_arbre($long_pers,$lat_pers){
+function distance_arbre(){
 
     /* IN <-- long_pers,lat_pers
     OUT --> boolean,id : True if proximité arbre et son id */
 
-    $host="irioso.sql.free.fr";
-    $database="irioso";
+    $json = file_get_contents('php://input');
+    $obj = json_decode($json);
+
+    $long_pers = $obj->long;
+    $lat_pers = $obj->lat;
+
+    $host = "irioso.sql.free.fr";
+    $database = "irioso";
     $user = "irioso";
     $password = "963364";
     $port = "3306";
 
-    //récupération des entrées du script
-    
-	$json = file_get_contents('php://input');
-	$obj = json_decode($json);
+    $connexion = mysqli_connect($host, $user, $password, $database, $port);
 
-    $long_pers = $obj->long ;
-    $lat_pers = $obj->lat ;
-
-    $connexion = mysqli_connect($host,$user,$password,$database,$port);
-
-    if(mysqli_errno($connexion)){
-        echo json_encode(array('error' => 'La connexion a échouée !'));
+    if (mysqli_errno($connexion)) {
+        echo json_encode(['error' => 'La connexion a échoué !']);
+        exit;
     }
 
-    else{
-        
-    }
+    $req_recup = 'SELECT latitude_estimee, longitude_estimee, id FROM arbres';
+    $result_recup = mysqli_query($connexion, $req_recup);
 
-    $req_recup='SELECT latitude_estimee,longitude_estimee,id FROM arbres';
-    $result_recup=mysqli_query($connexion, $req_recup);
-
-    if($result_recup){
+    if ($result_recup) {
         while ($row = mysqli_fetch_array($result_recup, MYSQLI_ASSOC)) {
-            $distance=sqrt(pow($long_pers-$row['longitude_estimee'],2) + pow($lat_pers-$row['latitude_estimee'],2));
-            if($distance<= 1){
-                $id=$row['id'];
-                return(json_encode(['booleen' => TRUE, 'id' => $row['id']]))
+            $distance = sqrt(pow($long_pers - $row['longitude_estimee'], 2) + pow($lat_pers - $row['latitude_estimee'], 2));
+            if ($distance <= 1) {
+                echo json_encode(['booleen' => true, 'id' => $row['id']]);
+                mysqli_close($connexion);
+                exit;
             }
         }
-    }
-
-    else{
-        echo json_encode(array('error' => 'bd vide !'));
-    }
-
-    mysqli_commit($connexion) ;
-    mysqli_close($connexion);
     
-    return FALSE;
+    // Aucun arbre trouvé à proximité
+    echo json_encode(['booleen' => false]);
+    }   
+    else {
+    echo json_encode(['error' => 'Erreur lors de la requête B.D.']);
+    }
+
+    mysqli_close($connexion);
 }
 
-distance_arbre($long_pers,$lat_pers);
+distance_arbre();
 
 ?>
