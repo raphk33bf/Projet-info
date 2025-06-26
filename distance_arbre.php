@@ -17,6 +17,12 @@ function distance_arbre(){
     $password = "963364";
     $port = "3306";
 
+    /*
+    if (!$obj || !isset($obj->long) || !isset($obj->lat)) {
+    echo json_encode(['error' => 'Entrée JSON manquante ou invalide']);
+    exit;
+    }*/
+
     $connexion = mysqli_connect($host, $user, $password, $database, $port);
 
     if (mysqli_errno($connexion)) {
@@ -30,7 +36,7 @@ function distance_arbre(){
     if ($result_recup) {
         while ($row = mysqli_fetch_array($result_recup, MYSQLI_ASSOC)) {
             $distance = sqrt(pow($long_pers - $row['longitude_estimee'], 2) + pow($lat_pers - $row['latitude_estimee'], 2));
-            if ($distance <= 1) {
+            if ($distance <= 0.001) {
                 echo json_encode(['booleen' => true, 'id' => $row['id']]);
                 mysqli_close($connexion);
                 exit;

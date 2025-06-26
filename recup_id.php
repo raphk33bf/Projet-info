@@ -1,7 +1,7 @@
 <?php
 
 
-function recup_id($nom,$prenom){
+function recup_id(){
 
     /* 
     IN <-- nom,prenom 
@@ -30,8 +30,13 @@ function recup_id($nom,$prenom){
     } 
 
     
+    /*if (!$obj || !isset($obj->long) || !isset($obj->lat)) {
+    echo json_encode(['error' => 'Entrée JSON manquante ou invalide']);
+    exit;
+    }*/
+
     else{
-		}
+		
 
         $stmt = $connexion->prepare("SELECT id, id_groupe FROM eleves WHERE nom like ? AND prenom like ?");
         $stmt->bind_param("ss", $nom, $prenom);
@@ -46,18 +51,17 @@ function recup_id($nom,$prenom){
             else {
                 echo json_encode(array('error' => 'Aucun résultat'));
             }
-
-            $stmt->close();
         } 
         else {
             echo json_encode(array('error' => 'ERREUR B.D !'));
         }
-    
+    }
+    mysqli_commit($connexion) ;
     mysqli_close($connexion);
 
 
 }
 
-recup_id($nom,$prenom);
+recup_id();
 
 ?>

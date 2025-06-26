@@ -43,14 +43,14 @@ function insert_nv_obs(){
             $max_id = $row_max_id['max_id'] + 1; // Incrémentation de l'ID pour la nouvelle observation
 
             // Nouvelle liaison entre l'arbre et l'observation
-            $req_insert_id_obs= $connexion-> "INSERT INTO `details_arbres` (`id_arbres`, `id_observations_arbres`) VALUES ('1', '2')";
+            $req_insert_id_obs= $connexion-> prepare("INSERT INTO `details_arbres` (`id_arbres`, `id_observations_arbres`) VALUES (?, ?)");
             $req_insert_id_obs-> bind_param("ii", $id, $max_id);
             $req_insert_id_obs->execute();
 
             // Insertion de la nouvelle observation
             $req_insert_obs = 'INSERT INTO observations_arbres (id,id_groupe, essence, latitude_estimee, longitude_estimee, circonference, mort, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
             $stmt_insert_obs = $connexion->prepare($req_insert_obs);
-            $stmt_insert_obs->bind_param("issss", $max_id, $id_groupe, $essence, $lat, $long, $circonference, $mort, $timestamp);
+            $stmt_insert_obs->bind_param("ssssssss", $max_id, $id_groupe, $essence, $lat, $long, $circonference, $mort, $timestamp);
             $stmt_insert_obs->execute();
 
         }

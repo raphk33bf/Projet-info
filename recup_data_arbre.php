@@ -18,20 +18,27 @@ function recup_data_arbre(){
 
     $id = $obj->id;
 
+    $connexion = mysqli_connect($host, $user, $password, $database, $port);
+
+
     if(mysqli_errno($connexion)){
        echo json_encode(array('error' => 'La connexion a échouée !'));
         
     }
 
     else{
-        $req_data="SELECT max(id_observations_arbres) from details_arbres WHERE id_arbres = " . $id;
-        $result_data=mysqli_query($connexion, $req_data);
+        $req_data= $connexion->prepare("SELECT max(id_observations_arbres) from details_arbres WHERE id_arbres = ?");
+        $req_data->bind_param("s", $id);
+        $req_data->execute();
+        $result_data = $req_data->get_result();
+
 
         if($result_data){
             $row = mysqli_fetch_array($result_data, MYSQLI_ASSOC);
-
-            $req_obs='SELECT essence,circonference,mort from observations_arbres WHERE id_observations_arbres = ' . $row['max(id_observations_arbres)'];
-            $result_obs = mysqli_query($connexion, $req_obs);
+            $req_obs=$connexion->prepare('SELECT essence,circonference,mort from observations_arbres WHERE id = ?');
+            $req_obs->bind_param("s", $row['max(id_observations_arbres)']);
+            $req_obs->execute();
+            $result_obs = $req_obs->get_result();
             
             if($result_obs){
                 $row_obs = mysqli_fetch_array($result_obs, MYSQLI_ASSOC);
@@ -44,7 +51,11 @@ function recup_data_arbre(){
                 echo json_encode(['error' => 'Erreur lors de la récupération des données d\'observation']);
             }
     }
+    mysqli_commit($connexion);
+    mysqli_close($connexion);
+    }
 }
 
 recup_data_arbre();
+
 ?>
