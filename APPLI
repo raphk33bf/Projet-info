@@ -232,7 +232,7 @@ class MyApp(App):
         for i in range(len(self.liste_moyens_estimes_h)):
             self.duree_h = self.liste_timestamp_h[i+1] - self.liste_timestamp_h[i]
             
-            self.label = Label(text=self.liste_moyens_estimes_h[i] + " pendant " + str(self.secondes_en_hms(int(self.duree_h))) + " secondes\n")
+            self.label = Label(text=self.liste_moyens_estimes_h[i] + " pendant " + str(self.secondes_en_hms(int(self.duree_h))) + " \n")
             self.layout.add_widget(self.label)
             
         self.label=Label(text= "\n\n Vous avez déclaré avoir utilisé les moyens suivants : \n")
@@ -316,6 +316,20 @@ class MyApp(App):
 
       
         UrlRequest(url='http://irioso.free.fr/Ambrasobin/insert_trajet.php', req_body=json.dumps(data),  req_headers=headers, on_success=self.on_success)
+        
+        if self.nom_est.strip() == self.nom_dec.text.strip():
+            self.timestamp_bonus = time()
+            data = {'timestamp_bonus': self.timestamp_bonus}
+            UrlRequest(
+                url='http://irioso.free.fr/Ambrasobin/insert_bonus.php',
+                req_body=json.dumps(data),
+                req_headers=headers,
+                on_success=self.on_success
+            )
+            self.label=Label(text="bravo, vous avez un bonus !")
+            self.layout.add_widget(self.label)
+
+            
         
     def on_success(self, request, result):
         #self.label = Label(text=result)
