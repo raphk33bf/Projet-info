@@ -1,0 +1,20 @@
+data = {'timestamp_debut': self.timestamp_debut, 'timestamp_fin': self.timestamp_fin, 'nom_est': self.nom_est,'nom_dec': self.nom_dec.text}
+
+        headers = {'Content-Type': 'application/json'}
+
+      
+        UrlRequest(url='http://irioso.free.fr/Ambrasobin/insert_trajet.php', req_body=json.dumps(data),  req_headers=headers, on_success=self.on_success)
+        
+        if self.nom_est.strip() == self.nom_dec.text.strip():
+            self.timestamp_bonus = time()
+            data = {'timestamp_bonus': self.timestamp_bonus}
+            UrlRequest(
+                url='http://irioso.free.fr/Ambrasobin/insert_bonus.php',
+                req_body=json.dumps(data),
+                req_headers=headers,
+                on_success=self.on_success
+            )
+            self.label=Label(text="bravo, vous avez un bonus !")
+            self.layout.add_widget(self.label)
+
+            
