@@ -131,9 +131,9 @@ class MyApp(App):
         self.layout.clear_widgets()
         self.horaire_donne = Label(text=" Sur quelle période voulez vous\n déterminer vos moyens de transport ?")
         self.layout.add_widget(self.horaire_donne)
-        self.horaire_debut = TextInput(hint_text=" Horaire de début sous la forme jj/mm/aaaa hh:mm")
+        self.horaire_debut = TextInput(text="25/06/2026 11:49")
         self.layout.add_widget(self.horaire_debut)
-        self.horaire_fin = TextInput(hint_text=" Horaire de fin sous la forme jj/mm/aaaa hh:mm")
+        self.horaire_fin = TextInput(text="25/06/2026 11:50")
         self.layout.add_widget(self.horaire_fin)
         self.button=Button(text="Entrer", on_press=self.envoi_horaire)
         self.layout.add_widget(self.button)
@@ -170,15 +170,14 @@ class MyApp(App):
         
     def success_horaire(self, request, result):
         self.layout.clear_widgets()
-        self.label=Label(text="Voici les moyens de transport que vous avez utilisé \n du  "+str(self.horaire_debut.text)+" au "+str(self.horaire_fin.text)+" : ")
-        self.layout.add_widget(self.label)
+        
         
         data = {'tt_debut': self.tt_debut, 'tt_fin': self.tt_fin}
         
         headers = {'Content-Type': 'application/json'}
 
       
-        UrlRequest(url='http://irioso.free.fr/Ambrasobin/deter_moyen.php', req_body=json.dumps(data),  req_headers=headers, on_success=self.on_horaire)
+        UrlRequest(url='http://irioso.free.fr/Ambrasobin/deter_moyen_h.php', req_body=json.dumps(data),  req_headers=headers, on_success=self.on_horaire)
         
     def on_horaire(self, requete, resultat):
        
@@ -190,21 +189,19 @@ class MyApp(App):
         self.layout.add_widget(self.button)
         if resultat[-1]!="}":
             resultat+="}"
-        data=json.loads(resultat)
+        data_h=json.loads(resultat)
         self.liste_moyens_estimes_h=[]
-        for valeur in data.values():
+        
+        for valeur in data_h.values():
             self.liste_moyens_estimes_h.append(valeur)
             
         self.liste_timestamp_h=[]
-        for cle in data.keys():
-            self.liste_timestamp_h.append(cle)
+        for cle in data_h.keys():
+            self.liste_timestamp_h.append(float(cle))
         self.liste_timestamp_h.append(self.tt_fin)
-        self.debug_label = Label(text="Debug...")
-        self.layout.add_widget(self.debug_label)
-
+        
         for i in range (len(self.liste_moyens_estimes_h)):
-            debug_text = f"i={i}\ndébut={self.liste_timestamp_h[i]}\nfin={self.liste_timestamp_h[i+1]}"
-            self.debug_label.text = debug_text
+            
             self.moyen_ss_trajet= self.liste_moyens_estimes_h[i]
             self.tt_debut_ss_trajet= self.liste_timestamp_h[i]
             self.tt_fin_ss_trajet=self.liste_timestamp_h[i+1]
@@ -220,12 +217,11 @@ class MyApp(App):
     def envoi_moy_h(self, instance):
         self.layout.clear_widgets()
         
-        self.label=Label(text="Nous avons estimé que vous avez utilisé les \n moyens de transport suivants : ")
+        self.label=Label(text="Voici les moyens de transport que vous avez utilisé \n du  "+str(self.horaire_debut.text)+" au "+str(self.horaire_fin.text)+" : ")
         self.layout.add_widget(self.label)
         for i in range(len(self.liste_moyens_estimes_h)):
-            # self.duree_h = self.liste_timestamp_h[i+1] - self.liste_timestamp_h[i]
-            # self.label = Label(text=self.liste_moyens_estimes_h[i] + " pendant " + str(int(self.duree_h)) + " secondes\n")
-            self.label = Label(text=self.liste_moyens_estimes_h[i])
+            self.duree_h = self.liste_timestamp_h[i+1] - self.liste_timestamp_h[i]
+            self.label = Label(text=self.liste_moyens_estimes_h[i] + " pendant " + str(int(self.duree_h)) + " secondes\n")
             self.layout.add_widget(self.label)
             
         self.label=Label(text= "\n\n Vous avez déclaré avoir utilisé les moyens suivants : \n")
