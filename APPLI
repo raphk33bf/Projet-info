@@ -211,8 +211,18 @@ class MyApp(App):
             
             UrlRequest(url='http://irioso.free.fr/Ambrasobin/insert_sous_trajet_detecte', req_body=json.dumps(data),  req_headers=headers, on_success=self.on_success)
   
-            
-        
+    def secondes_en_hms(self,secondes):
+        h = secondes // 3600
+        m = (secondes % 3600) // 60
+        s = secondes % 60
+    
+        bon_temps = ""
+        if h > 0:
+            bon_temps += f"{h}h"
+        if m > 0 or h > 0:  # on affiche les minutes si heures existent
+            bon_temps += f"{m}min"
+        bon_temps += f"{s}sec"
+        return bon_temps
         
     def envoi_moy_h(self, instance):
         self.layout.clear_widgets()
@@ -221,7 +231,8 @@ class MyApp(App):
         self.layout.add_widget(self.label)
         for i in range(len(self.liste_moyens_estimes_h)):
             self.duree_h = self.liste_timestamp_h[i+1] - self.liste_timestamp_h[i]
-            self.label = Label(text=self.liste_moyens_estimes_h[i] + " pendant " + str(int(self.duree_h)) + " secondes\n")
+            
+            self.label = Label(text=self.liste_moyens_estimes_h[i] + " pendant " + str(self.secondes_en_hms(int(self.duree_h))) + " secondes\n")
             self.layout.add_widget(self.label)
             
         self.label=Label(text= "\n\n Vous avez déclaré avoir utilisé les moyens suivants : \n")
