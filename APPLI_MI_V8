@@ -339,8 +339,6 @@ class MyApp(App):
         
     def ajout_trajet_journee(self, instance):
         """Détermination des moyens de transport entre deux heures de la journée"""
-        #Manque la descrition de la fonction
-        #Manque le changement de titre
         self.layout.clear_widgets()
         self.horaire_donne = Label(text=" Sur quelle période voulez vous\n déterminer vos moyens de transport ?")
         self.layout.add_widget(self.horaire_donne)
@@ -353,7 +351,7 @@ class MyApp(App):
         
     def heure_into_timestamp(self, string):
         """"Transforme heures en timestamp """
-        #Manque la description de la fonction
+
         try:
             clean_str = string.strip().replace('\n', '').replace('\r', '')
             dt =datetime.strptime(clean_str, "%d/%m/%Y %H:%M")
@@ -487,13 +485,20 @@ class MyApp(App):
         self.layout.add_widget(self.un_bouton_debut)
         self.layout.add_widget(self.un_bouton_fin)
         
-    def un_debut_gps(self, instance):
+    def un_debut_gps(self, instance, **kwargs):
         """Fonction permettant le début d'un enregistrement gps sans limite de temps fixe"""
         
         self.attente_gps = Label(text = "En attente des positions GPS")
         self.layout.add_widget(self.attente_gps)
         gps.configure(on_location=self.recup_donnees_gps)
         gps.start()
+        self.longitude=kwargs.get('lon')
+        self.latitude=kwargs.get('lat')
+        self.altitude=kwargs.get('altitude')
+        self.speed=kwargs.get('speed')
+        self.accuracy=kwargs.get('accuracy')
+        self.bearing=kwargs.get('bearing')
+        self.timestamp=time()
         self.timestamp_debut = time() 
         req_body = json.dumps({
             'long': self.longitude,
@@ -507,7 +512,7 @@ class MyApp(App):
         UrlRequest('http://irioso.free.fr/Groupe_1/lieu_d_interet_local.php', req_body=req_body, method=req_method, on_success=self.affiche_lieu)
 
     def affiche_lieu(self, requete, resultat):
-        self.affichage_lieu = Label(text=json.loads(resultat))
+        self.affichage_lieu = Label(text=resultat)
         self.layout.add_widget(self.affichage_lieu)
                
     
