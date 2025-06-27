@@ -410,7 +410,21 @@ class MyApp(App):
 
       
         UrlRequest(url='http://irioso.free.fr/Ambrasobin/insert_trajet.php', req_body=json.dumps(data),  req_headers=headers, on_success=self.on_success)
-        
+        if self.nom_est.strip() == self.nom_dec.text.strip():
+            self.timestamp_bonus = time()
+            data = {'timestamp_bonus': self.timestamp_bonus}
+            UrlRequest(
+                url='http://irioso.free.fr/Ambrasobin/insert_bonus.php',
+                req_body=json.dumps(data),
+                req_headers=headers,
+                on_success=self.on_success
+            )
+            self.label=Label(text="bravo, vous avez un bonus !")
+            self.layout.add_widget(self.label)
+        self.button=Button(text="Retour sur la page principale", on_press=self.retour_page_principale)
+        self.layout.add_widget(self.button)
+
+
     def on_success(self, request, result):
 
         pass
@@ -520,6 +534,8 @@ class MyApp(App):
         for i in range(len(moyens_decl)):
             self.label=Label(text=moyens_decl[i])
             self.layout.add_widget(self.label)
+        self.button=Button(text="Retour sur la page principale", on_press=self.retour_page_principale)
+        self.layout.add_widget(self.button)
         
         
         
