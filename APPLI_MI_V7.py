@@ -88,10 +88,10 @@ class MyApp(App):
         self.title = "Ambrasobin - Page principale"
         self.titre_page_principale = Label(text= "    Bienvenue sur\n la page principale !",underline = True, font_size='50sp', markup=True, color=[0.16,0.42,0.17,1])
         self.layout.add_widget(self.titre_page_principale)
-        self.choix_donnees = Label(text="Veux-tu ajouter un arbre ou un trajet ?")
-        self.arbre = Button(text="Ajouter un arbre", color=[0,0,0,1], background_normal = "", background_color = [0.16,0.42,0.17,1])
+        self.choix_donnees = Label(text="Que veux tu faire ?")
+        self.arbre = Button(text="Ajouter un arbre", color=[1,1,1,1], background_normal = "", background_color = [0.16,0.42,0.17,1])
         self.arbre.bind(on_press=self.page_arbre)
-        self.trajet = Button(text="Bonus - Demarrer un trajet et determiner \nles moyens de transport utilisés", color=[1,1,1,1], background_normal = "", background_color = [0.16,0.42,0.17,1])
+        self.trajet = Button(text="Bonus - Demarrer un trajet et determiner \nles moyens de transport utilisés", color=[0,0,0,1], background_normal = "", background_color = [1,1,0,1])
         self.trajet.bind(on_press=self.ajout_trajet)
         self.nouveau_depart = Button(text="Demarrer un trajet et determiner \nle moyen de transport utilisé")
         self.nouveau_depart.bind(on_press=self.un_ajout_trajet)
