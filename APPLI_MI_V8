@@ -13,18 +13,14 @@ Partie permettant l'affichage de l'application du module intégratif. Permet de 
 
 """Importation des bibliothèques"""
 from kivy.app import App
-from kivy.core.window import Window
-from kivy.uix.widget import Widget
 from kivy.network.urlrequest import UrlRequest
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.textinput import TextInput
-from random import randint
 from time import time
 from plyer import gps
 from datetime import datetime, date
-import requests
 import json
 
 
@@ -325,9 +321,9 @@ class MyApp(App):
         self.layout.clear_widgets()
         self.horaire_donne = Label(text=" Sur quelle période voulez vous\n déterminer vos moyens de transport ?")
         self.layout.add_widget(self.horaire_donne)
-        self.horaire_debut = TextInput(text="25/06/2026 11:49")
+        self.horaire_debut = TextInput(text="25/06/2025 11:49")
         self.layout.add_widget(self.horaire_debut)
-        self.horaire_fin = TextInput(text="25/06/2026 11:50")
+        self.horaire_fin = TextInput(text="25/06/2025 11:50")
         self.layout.add_widget(self.horaire_fin)
         self.button=Button(text="Entrer", on_press=self.envoi_horaire)
         self.layout.add_widget(self.button)
@@ -539,9 +535,6 @@ class MyApp(App):
         self.layout.add_widget(self.button)
 
 
-    def on_success(self, request, result):
-
-        pass
         
         
  
