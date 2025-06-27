@@ -523,7 +523,7 @@ class MyApp(App):
         headers = {'Content-Type': 'application/json'}
 
       
-        UrlRequest(url='http://irioso.free.fr/Ambrasobin/insert_trajet.php', req_body=json.dumps(data),  req_headers=headers, on_success=self.on_success)
+        UrlRequest(url='http://irioso.free.fr/Ambrasobin/insert_trajet.php', req_body=json.dumps(data),  req_headers=headers, on_success=self.data_consolidees)
         if self.nom_est.strip() == self.nom_dec.text.strip():
             self.timestamp_bonus = time()
             data = {'timestamp_bonus': self.timestamp_bonus}
@@ -585,7 +585,7 @@ class MyApp(App):
         headers = {'Content-Type': 'application/json'}
 
       
-        UrlRequest(url='http://irioso.free.fr/Ambrasobin/recup_donnees.php', req_body=json.dumps(data),  req_headers=headers, on_success=self.on_success)
+        UrlRequest(url='http://irioso.free.fr/Ambrasobin/recup_donnees.php', req_body=json.dumps(data),  req_headers=headers, on_success=self.data_consolidees)
         
     def on_success(self, request, result):
 
@@ -676,6 +676,12 @@ class MyApp(App):
         self.tableau_latitudes = json.loads(result)['latitudes']
         self.tableau_longitudes= json.loads(result)['longitudes']
         print(self.tableau_lieux_interet)
+
+    def data_consolidees(self, requete, resultat):
+        data = {'id_phone': self.id_phone, 'long': self.longitude, 'lat' : self.latitude, 'speed': self.speed, 'acc': self.accuracy, 'bearing': self.bearing, 'time': self.timestamp, 'alt': self.altitude}
+        
+        headers = {'Content-Type': 'application/json'}
+        UrlRequest(url='http://irioso.free.fr/Groupe_1/base_data_consolidees.php', req_body=json.dumps(data),  req_headers=headers)
         
     
 if __name__ == '__main__':
