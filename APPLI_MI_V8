@@ -36,7 +36,7 @@ class MyApp(App):
         
         return self.layout
     
-    def fen(self): 
+    def fen(self,instance=None): 
         """Création de la page permettant la connexion"""
         self.layout.clear_widgets()  
         self.nom_texte = Label(text="Quel est ton nom ?")
@@ -68,17 +68,19 @@ class MyApp(App):
         if result[-1]!="}":
            result+="}"
         data = json.loads(result)
-        if 'id' in data and 'id_groupe' in data:
-           self.id = data['id']
-           self.id_grp = data['id_groupe']
+        if not data.get('id') or not data.get('id_groupe'):
+         # Cas où id ou id_groupe est nul, vide, ou absent
+            self.layout.clear_widgets()
+            self.title = "Erreur de connexion"
+            self.erreur_label = Label(text="Erreur de connexion, veuillez réessayer.")
+            self.layout.add_widget(self.erreur_label)
+            self.bouton_reessayer = Button(text="Réessayer")
+            self.bouton_reessayer.bind(on_press=self.fen)
+            self.layout.add_widget(self.bouton_reessayer)
+            return
         else:
-           self.layout.clear_widgets()
-           self.title = "Erreur de connexion"
-           self.erreur_label = Label(text="Erreur de connexion, veuillez réessayer.")
-           self.layout.add_widget(self.erreur_label)
-           self.bouton_reessayer = Button(text="Réessayer")
-           self.bouton_reessayer.bind(on_press=self.fen)
-           self.layout.add_widget(self.bouton_reessayer)
+            self.id = data['id']
+            self.id_grp = data['id_groupe']
            
         self.layout.clear_widgets()
         self.title = "Ambrasobin - Page principale"
