@@ -472,6 +472,20 @@ class MyApp(App):
         gps.configure(on_location=self.recup_donnees_gps)
         gps.start()
         self.timestamp_debut = time() 
+        req_body = json.dumps({
+            'long': self.longitude,
+            'lat': self.latitude,
+            'id_groupe': self.id_grp,
+            'timestamp': self.timestamp
+           
+        })
+
+        req_method = 'POST'
+        UrlRequest('http://irioso.free.fr/Groupe_1/lieu_d_interet_local.php', req_body=req_body, method=req_method, on_success=self.affiche_lieu)
+
+    def affiche_lieu(self, requete, resultat):
+        self.affichage_lieu = Label(text=json.loads(resultat))
+        self.layout.add_widget(self.affichage_lieu)
                
     
     def un_fin_gps(self, instance):
