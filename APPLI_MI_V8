@@ -324,7 +324,7 @@ class MyApp(App):
         for i in range(len(self.liste_moyens_estimes_h)):
             self.duree_h = self.liste_timestamp_h[i+1] - self.liste_timestamp_h[i]
             
-            self.label = Label(text=self.liste_moyens_estimes_h[i] + " pendant " + str(self.secondes_en_hms(int(self.duree_h))) + " secondes\n")
+            self.label = Label(text=self.liste_moyens_estimes_h[i] + " pendant " + str(self.secondes_en_hms(int(self.duree_h))) + " \n")
             self.layout.add_widget(self.label)
             
         self.label=Label(text= "\n\n Vous avez déclaré avoir utilisé les moyens suivants : \n")
