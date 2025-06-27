@@ -33,7 +33,7 @@ class MyApp(App):
         self.title = 'Ambrasobin - Page de connexion'
         self.layout = BoxLayout(orientation='vertical')
         self.fen()
-        
+        self.id_phone = 1
         return self.layout
     
     def fen(self,instance=None): 
