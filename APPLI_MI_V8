@@ -266,7 +266,7 @@ class MyApp(App):
         req_method = 'POST'
         UrlRequest('http://irioso.free.fr/Groupe_1/inser_nv_obs.php', req_body=req_body, method=req_method, on_success=self.message_arbre)
         
-    def message_arbre(self):
+    def message_arbre(self,request,result):
         """Affichage d'un message pour dire que l'arbre a été ajouté"""
 
         self.layout.clear_widgets()
