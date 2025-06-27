@@ -96,12 +96,33 @@ class MyApp(App):
         self.nouveau_depart.bind(on_press=self.un_ajout_trajet)
         self.trajet_journee = Button(text="Determiner les moyens de transports \n utilisés sur une période de la journée")
         self.trajet_journee.bind(on_press=self.ajout_trajet_journee)
+        self.bouton_bonus=Button(text="compter les bonus du groupe")
+        self.bouton_bonus.bind(on_press=self.vers_compte_bonus)
         self.layout.add_widget(self.choix_donnees)       
         self.layout.add_widget(self.arbre)
         self.layout.add_widget(self.nouveau_depart)
         self.layout.add_widget(self.trajet_journee)
         self.layout.add_widget(self.trajet)
+        self.layout.add_widget(self.bouton_bonus)
         
+    def vers_compte_bonus(self, instance):
+        req_body = json.dumps({'id_groupe': self.id_grp})
+        req_method = 'POST'
+        UrlRequest('http://irioso.free.fr/Groupe_1/compte_bonus.php', req_body=req_body, method=req_method, on_success=self.affichage_compte_bonus)
+
+    def affichage_compte_bonus(self, request, result):
+        if result[-1]!="}":
+            result+="}"
+        data = json.loads(result)
+        self.layout.clear_widgets()
+        self.title = "Ambrasobin - Compte des bonus"
+        self.message = Label(text="Voici le compte des bonus du groupe :")
+        self.layout.add_widget(self.message)
+        self.bonus = Label(text="Nombre de bonus : " + str(data['bonus']))
+        self.layout.add_widget(self.bonus)
+        self.bouton_retour = Button(text="Retour à la page principale")
+        self.bouton_retour.bind(on_press=self.retour_page_principale)
+        self.layout.add_widget(self.bouton_retour)
         
     def page_arbre(self, instance, **kwargs):
         """Construction de la page pour ajouter un arbre"""
@@ -132,7 +153,6 @@ class MyApp(App):
         if booleen is True:
             self.id_arbre = json.loads(result)['id']
             req_body = json.dumps({'long': self.long, 'lat': self.lat, 'id': self.id_arbre})
-            req_method = 'POST'
             UrlRequest('http://irioso.free.fr/Groupe_1/MAJ_arbre.php', req_body=req_body, method='POST', on_success=self.test_bonus)
         else:
             # pas d'arbre, on peut en ajouter un
