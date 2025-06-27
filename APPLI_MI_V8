@@ -203,6 +203,8 @@ class MyApp(App):
 
    
 #-------------Partie trajet-------------------------------------
+
+#--------------1-Determiner les moyens de transports utilisés sur une période de la journée----------------
         
     def ajout_trajet_journee(self, instance):
         """Détermination des moyens de transport entre deux heures de la journée"""
@@ -336,9 +338,9 @@ class MyApp(App):
         for i in range(len(moyens_decl_h)):
             self.label=Label(text=moyens_decl_h[i])
             self.layout.add_widget(self.label)
-        
-        
-        
+
+
+ #--------------2-Demarrer un trajet et determiner le moyen de transport utilisé----------------       
         
     def un_ajout_trajet(self, instance):
         """"Construction de la page pour ajouter un trajet avec un moyen de transport"""
@@ -430,7 +432,8 @@ class MyApp(App):
         pass
         
         
-        
+ 
+ #------------3-Bonus - Demarrer un trajet et determiner les moyens de transport utilisés----------------          
         
     def ajout_trajet(self, instance):
         """"Construction de la page pour ajouter un trajet avec plusieurs moyens de transport """
