@@ -407,7 +407,7 @@ class MyApp(App):
             
             headers = {'Content-Type': 'application/json'}
             
-            UrlRequest(url='http://irioso.free.fr/Ambrasobin/insert_sous_trajet_detecte', req_body=json.dumps(data),  req_headers=headers, on_success=self.on_success)
+            UrlRequest(url='http://irioso.free.fr/Ambrasobin/insert_sous_trajet_detecte', req_body=json.dumps(data),  req_headers=headers)
   
     def secondes_en_hms(self,secondes):
         """Permet de convertir un temps en secondes en heures, minutes, secondes """
