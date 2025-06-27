@@ -579,24 +579,22 @@ class MyApp(App):
         
     def recup_donnees_gps(self, **kwargs):
         self.attente_gps.text = '\n'.join(['{}={}'.format(k, v) for k, v in kwargs.items()])
-        longitude=kwargs.get('lon')
-        latitude=kwargs.get('lat')
-        altitude=kwargs.get('altitude')
-        speed=kwargs.get('speed')
-        accuracy=kwargs.get('accuracy')
-        bearing=kwargs.get('bearing')
-        timestamp=time()
+        self.longitude=kwargs.get('lon')
+        self.latitude=kwargs.get('lat')
+        self.altitude=kwargs.get('altitude')
+        self.speed=kwargs.get('speed')
+        self.accuracy=kwargs.get('accuracy')
+        self.bearing=kwargs.get('bearing')
+        self.timestamp=time()
         
-        data = {'longitude': longitude, 'latitude': latitude, 'altitude': altitude,'timestamp': timestamp, 'speed': speed, 'bearing': bearing, 'accuracy' : accuracy}
+        data = {'longitude': self.longitude, 'latitude': self.latitude, 'altitude': self.altitude,'timestamp': self.timestamp, 'speed': self.speed, 'bearing': self.bearing, 'accuracy' : self.accuracy}
 
         headers = {'Content-Type': 'application/json'}
 
       
         UrlRequest(url='http://irioso.free.fr/Ambrasobin/recup_donnees.php', req_body=json.dumps(data),  req_headers=headers, on_success=self.data_consolidees)
         
-    def on_success(self, request, result):
-
-        pass
+  
         
         
     
