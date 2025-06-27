@@ -131,19 +131,129 @@ class MyApp(App):
             result+="}"
         booleen = json.loads(result)['booleen']
         if booleen is True:
-            id_arbre = json.loads(result)['id']
-            req_body = json.dumps({'long': self.long, 'lat': self.lat, 'id': id_arbre})
+            self.id_arbre = json.loads(result)['id']
+            req_body = json.dumps({'long': self.long, 'lat': self.lat, 'id': self.id_arbre})
             req_method = 'POST'
-            UrlRequest('http://irioso.free.fr/Groupe_1/MAJ_arbre.php', req_body=json.dumps({'id': id_arbre}), method='POST', on_success=self.message_arbre)
+            UrlRequest('http://irioso.free.fr/Groupe_1/MAJ_arbre.php', req_body=req_body, method='POST', on_success=self.test_bonus)
         else:
             # pas d'arbre, on peut en ajouter un
             self.enregistrement_nv_arbre(None)
-            
-    def message_arbre(self, *args):
-        """Affichage d'un message pour dire que l'arbre a été ajouté"""
+
+    def test_bonus(self, request, result):
+        req_body = json.dumps({'id': self.id_arbre,
+                                'timestamp': time()})
+        req_method = 'POST'
+        UrlRequest('http://irioso.free.fr/Groupe_1/insert_bonus.php', req_body=req_body, method=req_method, on_success=self.vers_recup_data_obs)
+        
+
+    def vers_recup_data_obs(self, request, result):
+        if result[-1]!="}":
+            result+="}"
+        booleen= json.loads(result)['booleen']
+        if booleen is True:
+            self.recup_data_obs()
+        else:
+            self.recup_data_obs()
+
+    def recup_data_obs(self):
+        req_body = json.dumps({'id': self.id_arbre})
+        req_method = 'POST'
+        UrlRequest('http://irioso.free.fr/Groupe_1/recup_data_arbre.php', req_body=req_body, method='POST', on_success=self.affichage_arbre)
+
+    def affichage_arbre(self, request, result):
+        if result[-1]!="}":
+            result+="}" # Correction pour s'assurer que le JSON est bien formé  
+        data = json.loads(result)
+
+        self.essence_val = data['essence']
+        self.circonference_val = data['circonference']
+        self.mort_val = data['mort']
+
         self.layout.clear_widgets()
+        self.title = "Ambrasobin - Données de l'arbre"
+        self.message = Label(text="Voici les données de l'arbre :")
+        self.layout.add_widget(self.message)
+        self.essence = Label(text="Essence : " + data['essence'])
+        self.layout.add_widget(self.essence)
+        self.circonference = Label(text="Circonférence : " + str(data['circonference']))
+        self.layout.add_widget(self.circonference)
+        self.mort = Label(text="État de l'arbre (0 mort, 1 vivant) : " + str(data['mort']))
+        self.layout.add_widget(self.mort)
+
+        self.bouton_diff = Button(text="Ajouter des données différentes")
+        self.bouton_diff.bind(on_press=self.inser_nv_datas)
+        self.layout.add_widget(self.bouton_diff)
+        self.bouton_egal = Button(text="Ajouter les mêmes données")
+        self.bouton_egal.bind(on_press=self.inser_mm_datas)
+        self.layout.add_widget(self.bouton_egal)
+
+    def inser_nv_datas(self, instance):
+
+        self.layout.clear_widgets()
+        self.title = "Ambrasobin - Insertion de nouvelles données"
+        self.essence = Label(text="Quelle est l'essence de l'arbre ?")
+        self.layout.add_widget(self.essence)
+        self.demande_essence = TextInput()
+        self.layout.add_widget(self.demande_essence)
+        self.circonference = Label(text="Quelle est la circonférence de l'arbre ?")
+        self.layout.add_widget(self.circonference)
+        self.demande_circonference = TextInput()
+        self.layout.add_widget(self.demande_circonference)
+        self.mort = Label(text="Quel est l'état de l'arbre (0 mort, 1 vivant) ?")
+        self.layout.add_widget(self.mort)
+        self.demande_mort = TextInput()
+        self.layout.add_widget(self.demande_mort)
+        self.bouton_envoi = Button(text="Enregistrer les données")
+        self.bouton_envoi.bind(on_press=self.envoi_nv_datas)
+        self.layout.add_widget(self.bouton_envoi)
+
+    def envoi_nv_datas(self, instance):
+        self.time= time()
+        req_body = json.dumps({'id': self.id_arbre,
+                                'id_groupe': self.id_grp,
+                                'lat': self.lat,
+                                'long': self.long,
+                                'timestamp': self.time,
+                                'essence': self.demande_essence.text,
+                                'circonference': self.demande_circonference.text,
+                                'mort': self.demande_mort.text})
+        req_method = 'POST'
+        UrlRequest('http://irioso.free.fr/Groupe_1/inser_nv_obs.php', req_body=req_body, method=req_method, on_success=self.message_arbre)
+
+
+
+    def inser_mm_datas(self, instance):
+        """Insertion des mêmes données pour un arbre déjà existant"""
+        self.layout.clear_widgets()
+        self.title = "Ambrasobin - Insertion des mêmes données"
+        self.message = Label(text="Les mêmes données seront insérées pour l'arbre.")
+        self.layout.add_widget(self.message)
+        self.bouton_envoi = Button(text="Enregistrer les données")
+        self.bouton_envoi.bind(on_press=self.envoi_mm_datas)
+        self.layout.add_widget(self.bouton_envoi)
+    
+    def envoi_mm_datas(self, instance):
+        """Envoi des mêmes données pour un arbre déjà existant"""
+        self.time = time()
+        req_body = json.dumps({
+        'id': self.id_arbre,
+        'id_groupe': self.id_grp,
+        'lat': self.lat,
+        'long': self.long,
+        'timestamp': self.time,
+        'essence': self.essence_val,
+        'circonference': self.circonference_val,
+        'mort': self.mort_val})         
+        req_method = 'POST'
+        UrlRequest('http://irioso.free.fr/Groupe_1/inser_nv_obs.php', req_body=req_body, method=req_method, on_success=self.message_arbre)
+        
+    def message_arbre(self):
+        """Affichage d'un message pour dire que l'arbre a été ajouté"""
+
+        self.layout.clear_widgets()
+
         self.title = "Ambrasobin - Arbre ajouté"
-        self.message = Label(text="L'arbre a bien été ajouté !")
+        self.message = Label(text="Les données ont bien été ajouté !")
         self.layout.add_widget(self.message)
         # retour à la page principale
         self.bouton_retour = Button(text="Retour à la page principale")
@@ -174,18 +284,20 @@ class MyApp(App):
         self.demande_mort_arbre = TextInput()
         self.layout.add_widget(self.demande_mort_arbre)
         
+
         self.nom_img = Label(text="nom de l'image ?")
         self.layout.add_widget(self.nom_img)
         self.demande_nom_img = TextInput()
         self.layout.add_widget(self.demande_nom_img)
-     
+        
 
         self.timestamp_arbre = time()
-     
+        
         self.bouton_envoi = Button(text="Enregistrer l'arbre")
         self.bouton_envoi.bind(on_press=self.envoi_arbre)
         self.layout.add_widget(self.bouton_envoi)
-     
+        
+
     def envoi_arbre(self, instance):
         req_body = json.dumps({
             'essence': self.demande_essence_arbre.text,
